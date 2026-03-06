@@ -10,15 +10,14 @@ from fhir_mcp.services.service_factory import get_intelligence_service
 from fhir_mcp.api.rest_routes import router as rest_router
 from fhir_mcp.middleware.observability import ProtocolTaggingMiddleware
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI
 import os
 
 def create_server() -> FastMCP:
     settings = Settings()
     
     server = FastMCP(
-        name="fhir-mcp-server",
-        version="1.0.0",
-        description="FHIR R4 MCP Server for clinical data access",
+        name="fhir-mcp-server"
     )
 
     auth = AuthManager(settings)
@@ -31,25 +30,33 @@ def create_server() -> FastMCP:
     register_terminology_tools(server, terminology)
     register_composite_tools(server, fhir, terminology)
 
-    # --- UNIFIED GATEWAY LOGIC (V3.1) ---
-    # FastMCP creates a Starlette/FastAPI app under the hood.
-    # We access it via ._app (available in recent versions of fastmcp)
-    app = getattr(server, "_app", None)
-    if app:
-        # 1. Apply CORS for Ambient EHR Sidecar (Strict Security)
-        allowed_origins = os.getenv("ALLOWED_EHR_ORIGINS", "http://localhost:3000").split(",")
-        app.add_middleware(
-            CORSMiddleware,
-            allow_origins=allowed_origins,
-            allow_credentials=True,
-            allow_methods=["GET", "POST", "OPTIONS"],
-            allow_headers=["*"],
-        )
-        
-        # 2. Add Protocol-Aware Telemetry
-        app.add_middleware(ProtocolTaggingMiddleware)
-        
-        # 3. Mount REST endpoints
-        app.include_router(rest_router)
 
     return server
+
+def create_app() -> FastAPI:
+    """Creates the resilient Dual-Protocol FastAPI host"""
+    mcp_server = create_server()
+    app = FastAPI(title="FHIR Clinical Intelligence Hub")
+    
+    # 1. Apply CORS for Ambient EHR Sidecar (Strict Security)
+    allowed_origins = os.getenv("ALLOWED_EHR_ORIGINS", "http://localhost:3000").split(",")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=allowed_origins,
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_headers=["*"],
+    )
+    
+    # 2. Add Protocol-Aware Telemetry
+    app.add_middleware(ProtocolTaggingMiddleware)
+    
+    # 3. Mount REST endpoints
+    app.include_router(rest_router)
+    
+    # 4. Extract and mount the FastMCP ASGI app (handles /sse and /messages)
+    mcp_app = mcp_server.http_app() if callable(getattr(mcp_server, "http_app", None)) else getattr(mcp_server, "_app", None)
+    if mcp_app:
+        app.mount("/mcp", mcp_app)
+        
+    return app

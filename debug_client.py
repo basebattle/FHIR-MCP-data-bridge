@@ -1,7 +1,10 @@
+import sys
+import os
 import asyncio
 import httpx
-import os
 import json
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
 from fhir_mcp.services.service_factory import get_intelligence_service
 
 async def verify_parity():

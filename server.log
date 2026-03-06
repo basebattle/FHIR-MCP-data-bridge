@@ -1,0 +1,17 @@
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/websockets/legacy/__init__.py:6: DeprecationWarning: websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions
+  warnings.warn(  # deprecated in 14.0 - 2024-11-09
+/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/site-packages/uvicorn/protocols/websockets/websockets_impl.py:17: DeprecationWarning: websockets.server.WebSocketServerProtocol is deprecated
+  from websockets.server import WebSocketServerProtocol
+INFO:     Started server process [85439]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+DeepSense Semantic Search Error: Redirect response '301 Moved Permanently' for url 'https://mcp.deepsense.ai/icd10_codes/v1'
+Redirect location: 'https://docs.mcp.deepsense.ai:443/'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/301
+
+🚀 Starting FHIR-MCP-data-bridge V3.1 Dual-Protocol Hub...
+REST Endpoints available at: http://localhost:8000/api/v3
+MCP SSE available at: http://localhost:8000/mcp/sse
+
+INFO:     127.0.0.1:56765 - "GET /api/v3/semantic-search?q=Diabetes HTTP/1.1" 200 OK

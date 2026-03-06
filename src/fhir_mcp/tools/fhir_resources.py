@@ -1,7 +1,7 @@
 from typing import Any, Dict, Optional
 from fastmcp import FastMCP
 from fhir_mcp.services.fhir_client import FHIRClient
-from fhir_mcp.services.icd10_service import ICD10Service
+from fhir_mcp.services.icd10_service import ClinicalIntelligenceService
 from fhir_mcp.services.query_builder import QueryBuilder
 from fhir_mcp.services.response_mapper import ResponseMapper
 from fhir_mcp.config.constants import TOOL_DESCRIPTIONS
@@ -39,7 +39,7 @@ async def _execute_fhir_search(
         logger.error(f"Error in search_{resource_type.lower()}: {str(e)}")
         return f"Error executing search for {resource_type}: {str(e)}"
 
-def register_fhir_tools(server: FastMCP, fhir: FHIRClient, icd10_service: ICD10Service):
+def register_fhir_tools(server: FastMCP, fhir: FHIRClient, icd10_service: ClinicalIntelligenceService):
     """Registers all 8 core FHIR resource search tools with V2 Intelligence."""
 
     @server.tool(name="search_patients", description=TOOL_DESCRIPTIONS["search_patients"])

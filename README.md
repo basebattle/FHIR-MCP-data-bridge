@@ -88,11 +88,11 @@ Start the Dual-Protocol Hub in Production Mode to support both AI Agents and Sid
 export DEEPSENSE_API_KEY="your_key"
 export INTERNAL_API_KEY="your_internal_key"
 
-# 2. Launch the server
-fhir-mcp-server --transport sse --port 8000
+# 2. Launch the Hub via the local runner (Bypasses macOS pip permissions)
+python3 run_server.py
 
 # 3. Verify MCP Protocol (For AI Agents)
-# Use your favorite MCP inspector or Claude Desktop
+# Use your favorite MCP inspector or Claude Desktop connecting to http://localhost:8000/sse
 
 # 4. Verify REST Protocol (For EHR Ambient Sidecar UI)
 curl -H "X-API-KEY: your_internal_key" http://localhost:8000/api/v3/semantic-search?q=Asthma
