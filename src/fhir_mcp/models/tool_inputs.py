@@ -27,6 +27,7 @@ class PatientSearchInput(BaseModel):
 class ConditionSearchInput(BaseModel):
     patient: Optional[str] = Field(None, description="FHIR Patient resource ID")
     code: Optional[str] = Field(None, description="ICD-10 or SNOMED code")
+    fuzzy_text: Optional[str] = Field(None, description="Natural language diagnosis (e.g., 'Stomach ache') for semantic search")
     clinical_status: Optional[str] = Field(None, description="active, recurrence, inactive, resolved")
     category: Optional[str] = Field(None, description="encounter-diagnosis, problem-list-item")
     onset_date: Optional[str] = Field(None, description="Date with prefix (ge2024-01-01)")

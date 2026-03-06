@@ -27,3 +27,6 @@ class Settings(BaseSettings):
 
     # Logging
     log_level: str = "INFO"
+
+    # DeepSense Intelligence V2
+    deepsense_api_key: Optional[str] = None

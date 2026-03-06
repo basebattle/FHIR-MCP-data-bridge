@@ -1,18 +1,16 @@
-# FHIR-MCP Healthcare Data Bridge
-### MCP Server Connecting AI Agents to EHR Systems via FHIR R4
+# 🏥 FHIR-MCP-data-bridge V2: Clinical & Financial Intelligence
+### Smart MCP Server Connecting AI Agents to EHR Systems via FHIR R4
 
-**FHIR-MCP Bridge** is a production-grade MCP (Model Context Protocol) server that enables AI agents (like Claude Desktop) to interact directly with healthcare data using the FHIR R4 standard. It provides tools for searching clinical resources and looking up medical terminology, enabling natural-language clinical queries that were previously complex to implement.
+**FHIR-MCP Bridge V2** is a production-grade MCP (Model Context Protocol) server that transforms a standard FHIR data pipeline into a **Clinical and Financial Intelligence Engine**. It enables AI agents to not only access healthcare data but to **understand and value it** using advanced semantic search, cross-terminology mapping, and HCC risk scoring.
 
-## 🚀 Key Features
+## 🚀 Key Features (V2 Edition)
 
-- **19 MCP Tools**: Comprehensive access to Patients, Conditions, Observations, Medications, Encounters, and more plus universal CRUD support.
+- **Deep Semantic Search (NEW)**: Replaces rigid ICD-10 lookups with DeepSense-powered natural language processing (e.g., querying "Shortness of breath" automatically maps to correct FHIR codes).
+- **Automated SNOMED Translation (NEW)**: On-the-fly cross-walking from SNOMED-CT clinical concepts to billing-ready ICD-10-CM classifications.
+- **HCC Risk Scoring (NEW)**: Automatically tags FHIR `Condition` resources with Hierarchical Condition Category (HCC) risk weights, identifying high-value clinical encounters for immediate financial analytics.
+- **19+ MCP Tools**: Comprehensive access to Patients, Conditions, Observations, Medications, Encounters, and more plus universal CRUD support.
 - **Natural Language Interoperability**: Ask Claude "Find patients with diabetes who are on metformin" and the server handles the FHIR API calls.
-- **Universal FHIR CRUD**: Perform full Create, Read, Update, and Delete operations on ANY FHIR resource type.
-- **Dynamic Pagination**: Smart traversal of multi-page FHIR bundles for large clinical datasets.
-- **Terminology Intelligence**: Integrated lookup for ICD-10-CM, SNOMED CT, LOINC, and RxNorm.
-- **Composite Summaries**: Fast, parallel assembly of complete patient clinical overviews.
 - **Enterprise Ready**: Supports SMART-on-FHIR OAuth 2.0 (Client Credentials & Auth Code) for Epic, Cerner, and HAPI.
-- **Privacy First**: Stateless design with zero local PHI retention.
 
 ## 🛠️ MCP Tools Reference
 
