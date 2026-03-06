@@ -71,11 +71,37 @@ Add this entry:
 - `search_observations(patient=..., code=...)`: Search vitals and labs (e.g., LOINC `4548-4` for A1c).
 - `get_patient_summary(patient_id=...)`: Unified clinical overview.
 
+### Write & Generic Operations (NEW)
+- `create(resource_type=..., payload=...)`: Create ANY resource (e.g., `Observation`).
+- `update(resource_type=..., resource_id=..., payload=...)`: Modify existing data.
+- `delete(resource_type=..., resource_id=...)`: Secure deletion of resources.
+- `read(resource_type=..., resource_id=...)`: Direct ID-based lookup.
+- `get_capabilities()`: List supported FHIR server resources.
+
 ### Terminology Lookup
 - `lookup_icd10(query=...)`: Identify diagnosis codes for reporting.
 - `lookup_rxnorm(query=...)`: Identify medication codes and dosages.
 
-## 5. Hosting Strategy
+## 5. Advanced Authentication
+
+The bridge supports two primary OAuth 2.0 modes for EHR integration:
+
+### Client Credentials (B2B)
+Best for system-level integrations where no user context is needed.
+```bash
+FHIR_SERVER_AUTH_MODE=client_credentials
+FHIR_SERVER_CLIENT_ID=...
+FHIR_SERVER_CLIENT_SECRET=...
+FHIR_SERVER_TOKEN_URL=...
+```
+
+### Authorization Code (SMART-on-FHIR)
+Required for user-specific context and patient-facing applications. Since MCP servers are often headless, use the provided tool to retrieve identities:
+1. Set `FHIR_SERVER_AUTH_MODE=authorization_code`.
+2. Provide a pre-exchanged `FHIR_SERVER_ACCESS_TOKEN` for stable headless sessions.
+3. Use the `get_user` tool to verify the current session's clinical profile.
+
+## 6. Hosting Strategy
 
 ### Option A: Local Execution (Stdio)
 Best for developers and individual clinical informaticists. The server runs as a child process of the MCP client (like Claude).

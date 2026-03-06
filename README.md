@@ -5,8 +5,10 @@
 
 ## 🚀 Key Features
 
-- **14 MCP Tools**: Comprehensive access to Patients, Conditions, Observations, Medications, Encounters, and more.
+- **19 MCP Tools**: Comprehensive access to Patients, Conditions, Observations, Medications, Encounters, and more plus universal CRUD support.
 - **Natural Language Interoperability**: Ask Claude "Find patients with diabetes who are on metformin" and the server handles the FHIR API calls.
+- **Universal FHIR CRUD**: Perform full Create, Read, Update, and Delete operations on ANY FHIR resource type.
+- **Dynamic Pagination**: Smart traversal of multi-page FHIR bundles for large clinical datasets.
 - **Terminology Intelligence**: Integrated lookup for ICD-10-CM, SNOMED CT, LOINC, and RxNorm.
 - **Composite Summaries**: Fast, parallel assembly of complete patient clinical overviews.
 - **Enterprise Ready**: Supports SMART-on-FHIR OAuth 2.0 (Client Credentials & Auth Code) for Epic, Cerner, and HAPI.
@@ -17,12 +19,16 @@
 | Tool | Description |
 |------|-------------|
 | `search_patients` | Demographics search (Name, DOB, MRN, Gender). |
-| `search_conditions` | Active diagnoses and clinical status. |
-| `search_observations` | Vital signs and laboratory results with date filtering. |
-| `search_medications` | Active prescriptions and dosage instructions. |
+| `search_conditions`| List active diagnoses for a specific patient. |
+| `search_observations`| Vital signs and laboratory results with date filtering. |
+| `read` | Retrieve any FHIR resource by ID (e.g., Patient/123). |
+| `create` | Persist a new FHIR resource from a JSON payload. |
+| `update` | Modify an existing FHIR resource by ID. |
+| `delete` | Securely remove a FHIR resource by ID. |
 | `get_patient_summary` | One-shot assembly of demographics + conditions + meds + vitals. |
 | `lookup_icd10` | Intelligent ICD-10-CM diagnosis code lookup. |
-| `get_server_capabilities`| Discovery of FHIR server supported resources. |
+| `get_capabilities`| Discovery of FHIR server supported resources and version. |
+| `get_user` | Retrieve the authenticated user's FHIR profile (SMART-on-FHIR). |
 
 ## 📦 Quick Start
 
