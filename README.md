@@ -5,10 +5,12 @@
 
 ## 🚀 Key Features (V2 Edition)
 
-- **Deep Semantic Search (NEW)**: Replaces rigid ICD-10 lookups with DeepSense-powered natural language processing (e.g., querying "Shortness of breath" automatically maps to correct FHIR codes).
-- **Automated SNOMED Translation (NEW)**: On-the-fly cross-walking from SNOMED-CT clinical concepts to billing-ready ICD-10-CM classifications.
-- **HCC Risk Scoring (NEW)**: Automatically tags FHIR `Condition` resources with Hierarchical Condition Category (HCC) risk weights, identifying high-value clinical encounters for immediate financial analytics.
-- **19+ MCP Tools**: Comprehensive access to Patients, Conditions, Observations, Medications, Encounters, and more plus universal CRUD support.
+- **Deep Semantic Search (NEW)**: Replaces rigid ICD-10 lookups with DeepSense-powered natural language processing.
+- **Automated SNOMED Translation (NEW)**: On-the-fly cross-walking from SNOMED-CT clinical concepts to billing-ready ICD-10-CM.
+- **HCC Risk Scoring (NEW)**: Automatically tags FHIR `Condition` resources with financial risk weights.
+- **Dual-Protocol Advantage (V3.1)**: Unified architecture powering both autonomous AI Agents (MCP) and Ambient EHR Sidecars (REST).
+- **Protocol-Aware Telemetry**: Granular logging and performance monitoring for high-latency AI requests vs. high-frequency UI requests.
+- **Unified Security**: Hardened gateway with dynamic CORS whitelisting and API Key enforcement.
 - **Natural Language Interoperability**: Ask Claude "Find patients with diabetes who are on metformin" and the server handles the FHIR API calls.
 - **Enterprise Ready**: Supports SMART-on-FHIR OAuth 2.0 (Client Credentials & Auth Code) for Epic, Cerner, and HAPI.
 
@@ -75,6 +77,25 @@ Add the following to your `claude_desktop_config.json`:
     }
   }
 }
+```
+
+## 🚀 V3.1 Release Sequence (Launch)
+
+Start the Dual-Protocol Hub in Production Mode to support both AI Agents and Sidecar UIs:
+
+```bash
+# 1. Configure the environment
+export DEEPSENSE_API_KEY="your_key"
+export INTERNAL_API_KEY="your_internal_key"
+
+# 2. Launch the server
+fhir-mcp-server --transport sse --port 8000
+
+# 3. Verify MCP Protocol (For AI Agents)
+# Use your favorite MCP inspector or Claude Desktop
+
+# 4. Verify REST Protocol (For EHR Ambient Sidecar UI)
+curl -H "X-API-KEY: your_internal_key" http://localhost:8000/api/v3/semantic-search?q=Asthma
 ```
 
 ## 🧪 Example Queries

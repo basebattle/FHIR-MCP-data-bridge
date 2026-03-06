@@ -68,13 +68,15 @@ def register_fhir_tools(server: FastMCP, fhir: FHIRClient, icd10_service: ICD10S
         onset_date: Optional[str] = None,
         _count: int = 50
     ) -> str:
-        # 1. Semantic Search Pivot (V2)
+        # 1. Semantic Search Pivot (V3.1)
         fuzzy_note = ""
         if fuzzy_text and not code:
-            semantic_suggestions = await icd10_service.search_codes_by_text(fuzzy_text)
+            semantic_suggestions = await icd10_service.get_semantic_suggestions(fuzzy_text)
             if semantic_suggestions:
-                code = semantic_suggestions[0]['code']
-                fuzzy_note = f"### [V2 Semantic Match]\nQueried FHIR for **{code}** ({semantic_suggestions[0]['description']}) based on input: *\"{fuzzy_text}\"*\n\n"
+                # Type hints ensure we have .code and .description
+                suggestion = semantic_suggestions[0]
+                code = suggestion.code
+                fuzzy_note = f"### [V2 Semantic Match]\nQueried FHIR for **{code}** ({suggestion.description}) based on input: *\"{fuzzy_text}\"*\n\n"
             else:
                 return f"No ICD-10 semantic matches found for '{fuzzy_text}'. Please try a different query or provide a specific code."
 
@@ -87,26 +89,19 @@ def register_fhir_tools(server: FastMCP, fhir: FHIRClient, icd10_service: ICD10S
         # Original FHIR search execution
         raw_response = await _execute_fhir_search(fhir, "Condition", input_data)
         
-        # 2. Financial & Translation Pipeline Enrichment (V2)
+        # 2. Financial & Translation Pipeline Enrichment (V3.1)
         try:
-            # Re-parse the text result if it's JSON to enrich it
-            # In a real implementation, _execute_fhir_search might return the raw dict
-            # For this MVP, we assume it's JSON for easier demo display
-            data = json.loads(raw_response)
+            # We add a note about the hcc data if we can find a code in the result
+            # Since map_bundle returns text, we'll look for codes inside it or use the top code
+            if code:
+                hcc = icd10_service.calculate_hcc_weight(code)
+                if hcc.hcc_impact:
+                    fuzzy_note += f"> [!NOTE]\n> **Financial Intelligence**: This diagnosis ({code}) has an HCC Impact Category of **{hcc.category}** (Weight: {hcc.weight})\n\n"
             
-            if "entries" in data: # ResponseMapper.map_bundle might use 'entries'
-                for entry in data["entries"]:
-                    resource = entry.get("resource", {})
-                    # Add intelligence to the code display
-                    code_val = resource.get("code", "Unknown")
-                    # If we had the system, we'd use it. For now, we simulate with a lookup.
-                    # This is a bit simplified for the text returned by ResponseMapper
-                    pass 
-            
-            # Since map_bundle returns formatted text, we'll append a summary of the 'Risks' found
             return fuzzy_note + raw_response
             
-        except:
+        except Exception as e:
+            logger.error(f"Enrichment error: {str(e)}")
             return fuzzy_note + raw_response
 
     @server.tool(name="search_observations", description=TOOL_DESCRIPTIONS["search_observations"])
