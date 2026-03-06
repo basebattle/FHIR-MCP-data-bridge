@@ -21,8 +21,7 @@ class AuthManager:
         return {"Authorization": f"Bearer {token}"}
 
     async def get_token(self) -> str:
-        """Retrieves a valid OAuth token from cache or via client credentials grant."""
-        # Simple cache check based on scope/endpoint as key
+        """Retrieves a valid OAuth token from cache or via appropriate grant."""
         cache_key = self.settings.fhir_server_token_url or "default"
         
         cached = self.token_cache.get(cache_key)
@@ -32,8 +31,19 @@ class AuthManager:
         if self.settings.fhir_server_auth_mode == "client_credentials":
             return await self._refresh_client_credentials(cache_key)
         
-        # authorization_code flow would be handled here in Phase 4
-        raise FHIRAuthError(f"Auth mode {self.settings.fhir_server_auth_mode} not yet fully implemented or token missing.")
+        if self.settings.fhir_server_auth_mode == "authorization_code":
+            # In a real SMART-on-FHIR app, this would involve a redirect.
+            # For an MCP server, we expect the FHIR_SERVER_ACCESS_TOKEN 
+            # or a pre-exchanged Refresh Token to be present in settings.
+            if hasattr(self.settings, "fhir_server_access_token") and self.settings.fhir_server_access_token:
+                return self.settings.fhir_server_access_token
+            
+            raise FHIRAuthError(
+                "authorization_code mode requires an interactive login or a valid access token in environment variables. "
+                "Please set FHIR_SERVER_ACCESS_TOKEN for headless use."
+            )
+            
+        raise FHIRAuthError(f"Auth mode {self.settings.fhir_server_auth_mode} not supported or token missing.")
 
     async def _refresh_client_credentials(self, cache_key: str) -> str:
         """Performs client_credentials grant to get a new token."""

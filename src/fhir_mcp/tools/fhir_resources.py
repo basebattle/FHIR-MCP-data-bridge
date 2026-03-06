@@ -154,3 +154,52 @@ def register_fhir_tools(server: FastMCP, fhir: FHIRClient):
             patient=patient, status=status, category=category, _count=_count
         )
         return await _execute_fhir_search(fhir, "CarePlan", input_data)
+
+    # --- Generic FHIR CRUD Tools ---
+
+    @server.tool(name="read", description="Perform a FHIR 'read' interaction to retrieve a single resource by type and ID.")
+    async def read(resource_type: str, resource_id: str) -> str:
+        try:
+            response = await fhir.read(resource_type, resource_id)
+            return ResponseMapper.map_resource(response.data)
+        except Exception as e:
+            return f"Error reading {resource_type}/{resource_id}: {str(e)}"
+
+    @server.tool(name="create", description="Execute a FHIR 'create' interaction to persist a new resource.")
+    async def create(resource_type: str, payload: Dict[str, Any]) -> str:
+        try:
+            response = await fhir.create(resource_type, payload)
+            return f"Successfully created {resource_type}/{response.data.get('id', 'new')}\n\n" + ResponseMapper.map_resource(response.data)
+        except Exception as e:
+            return f"Error creating {resource_type}: {str(e)}"
+
+    @server.tool(name="update", description="Performs a FHIR 'update' interaction by replacing an existing resource instance.")
+    async def update(resource_type: str, resource_id: str, payload: Dict[str, Any]) -> str:
+        try:
+            response = await fhir.update(resource_type, resource_id, payload)
+            return f"Successfully updated {resource_type}/{resource_id}\n\n" + ResponseMapper.map_resource(response.data)
+        except Exception as e:
+            return f"Error updating {resource_type}/{resource_id}: {str(e)}"
+
+    @server.tool(name="delete", description="Execute a FHIR 'delete' interaction on a specific resource instance.")
+    async def delete(resource_type: str, resource_id: str) -> str:
+        try:
+            await fhir.delete(resource_type, resource_id)
+            return f"Successfully deleted {resource_type}/{resource_id}"
+        except Exception as e:
+            return f"Error deleting {resource_type}/{resource_id}: {str(e)}"
+
+    @server.tool(name="get_capabilities", description="Retrieves FHIR server metadata (CapabilityStatement).")
+    async def get_capabilities() -> str:
+        try:
+            data = await fhir.capabilities()
+            software = data.get("software", {}).get("name", "Unknown")
+            version = data.get("fhirVersion", "Unknown")
+            return f"FHIR Server: {software} (v{version})\nResources supported: {len(data.get('rest', [{}])[0].get('resource', []))}"
+        except Exception as e:
+            return f"Error fetching server capabilities: {str(e)}"
+
+    @server.tool(name="get_user", description="Retrieves the currently authenticated user's FHIR profile.")
+    async def get_user() -> str:
+        # Placeholder for user profile retrieval via ID token or current context
+        return "Authenticated user identity currently mapped to: Unknown (Requires SMART-on-FHIR Login)"

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional
+from typing import Optional, Dict, Any
 
 class PatientSearchInput(BaseModel):
     name: Optional[str] = Field(None, description="Patient name (partial match)")
@@ -74,3 +74,25 @@ class CarePlanSearchInput(BaseModel):
     status: Optional[str] = Field(None, description="active, completed, revoked")
     category: Optional[str] = Field(None, description="Care plan category")
     count: int = Field(20, ge=1, le=50, alias="_count")
+
+# --- Generic Tools ---
+
+class GenericReadInput(BaseModel):
+    resource_type: str = Field(..., description="FHIR resource type (e.g., Patient, Observation)")
+    id: str = Field(..., description="Logical ID of the resource")
+
+class GenericCreateInput(BaseModel):
+    resource_type: str = Field(..., description="FHIR resource type")
+    payload: Dict[str, Any] = Field(..., description="Full FHIR resource JSON")
+
+class GenericUpdateInput(BaseModel):
+    resource_type: str = Field(..., description="FHIR resource type")
+    id: str = Field(..., description="Logical ID of the resource")
+    payload: Dict[str, Any] = Field(..., description="Update resource JSON body")
+
+class GenericDeleteInput(BaseModel):
+    resource_type: str = Field(..., description="FHIR resource type")
+    id: str = Field(..., description="Logical ID of the resource")
+
+class GetCapabilitiesInput(BaseModel):
+    resource_type: Optional[str] = Field(None, description="Optional resource type to check specifically")

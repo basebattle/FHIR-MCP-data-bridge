@@ -48,7 +48,10 @@ class ResponseMapper:
         elif rt == "CarePlan":
             return ResponseMapper.map_careplan(resource)
         else:
-            return f"[{rt}] {resource.get('id', 'No ID')}"
+            import json
+            # Generic fallback with basic info and indented JSON
+            rid = resource.get('id', 'No ID')
+            return f"[{rt}/{rid}]\n{json.dumps(resource, indent=3)}"
 
     @staticmethod
     def map_patient(resource: Dict[str, Any]) -> str:

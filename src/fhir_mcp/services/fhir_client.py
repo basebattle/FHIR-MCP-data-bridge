@@ -74,6 +74,9 @@ class FHIRClient:
                     raise FHIRValidationError(f"FHIR server error: {details}", details=json.dumps(data))
                 response.raise_for_status()
             
+            if response.status_code == 204:
+                return {}
+            
             return response.json()
             
         except httpx.ConnectError as e:
@@ -124,6 +127,27 @@ class FHIRClient:
         path = f"{resource_type}/{resource_id}"
         data = await self._request("GET", path)
         return FHIRResponse(status_code=200, data=data, resource_type=resource_type)
+
+    async def create(self, resource_type: str, payload: Dict[str, Any]) -> FHIRResponse:
+        """Create a new FHIR resource with a generated ID."""
+        data = await self._request("POST", resource_type, json=payload)
+        return FHIRResponse(status_code=201, data=data, resource_type=resource_type)
+
+    async def update(self, resource_type: str, resource_id: str, payload: Dict[str, Any]) -> FHIRResponse:
+        """Update a state of a FHIR resource by replacing its contents."""
+        path = f"{resource_type}/{resource_id}"
+        data = await self._request("PUT", path, json=payload)
+        return FHIRResponse(status_code=200, data=data, resource_type=resource_type)
+
+    async def delete(self, resource_type: str, resource_id: str) -> FHIRResponse:
+        """Execute a FHIR 'delete' interaction on a specific resource."""
+        path = f"{resource_type}/{resource_id}"
+        # FHIR delete usually returns 204 or an OperationOutcome.
+        # However, _request is expected to return JSON, which might fail on 204.
+        # Let's handle 204 via an exception-like approach or modify _request.
+        # Refactoring _request below.
+        data = await self._request("DELETE", path)
+        return FHIRResponse(status_code=204, data=data, resource_type=resource_type)
 
     async def capabilities(self) -> Dict[str, Any]:
         """Fetch server CapabilityStatement."""
