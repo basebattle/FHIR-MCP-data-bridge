@@ -1,6 +1,7 @@
 from typing import Any, Dict, Optional
 from fastmcp import FastMCP
 from fhir_mcp.services.fhir_client import FHIRClient
+from fhir_mcp.services.icd10_service import ClinicalIntelligenceService
 from fhir_mcp.services.query_builder import QueryBuilder
 from fhir_mcp.services.response_mapper import ResponseMapper
 from fhir_mcp.config.constants import TOOL_DESCRIPTIONS
@@ -38,8 +39,8 @@ async def _execute_fhir_search(
         logger.error(f"Error in search_{resource_type.lower()}: {str(e)}")
         return f"Error executing search for {resource_type}: {str(e)}"
 
-def register_fhir_tools(server: FastMCP, fhir: FHIRClient):
-    """Registers all 8 core FHIR resource search tools."""
+def register_fhir_tools(server: FastMCP, fhir: FHIRClient, icd10_service: ClinicalIntelligenceService):
+    """Registers all 8 core FHIR resource search tools with V2 Intelligence."""
 
     @server.tool(name="search_patients", description=TOOL_DESCRIPTIONS["search_patients"])
     async def search_patients(
@@ -57,20 +58,51 @@ def register_fhir_tools(server: FastMCP, fhir: FHIRClient):
         )
         return await _execute_fhir_search(fhir, "Patient", input_data)
 
-    @server.tool(name="search_conditions", description=TOOL_DESCRIPTIONS["search_conditions"])
+    @server.tool(name="search_conditions", description=TOOL_DESCRIPTIONS["search_conditions"] + " Supports V2 Semantic Search and HCC Risk Scoring.")
     async def search_conditions(
         patient: Optional[str] = None,
         code: Optional[str] = None,
+        fuzzy_text: Optional[str] = None,
         clinical_status: Optional[str] = None,
         category: Optional[str] = None,
         onset_date: Optional[str] = None,
         _count: int = 50
     ) -> str:
+        # 1. Semantic Search Pivot (V3.1)
+        fuzzy_note = ""
+        if fuzzy_text and not code:
+            semantic_suggestions = await icd10_service.get_semantic_suggestions(fuzzy_text)
+            if semantic_suggestions:
+                # Type hints ensure we have .code and .description
+                suggestion = semantic_suggestions[0]
+                code = suggestion.code
+                fuzzy_note = f"### [V2 Semantic Match]\nQueried FHIR for **{code}** ({suggestion.description}) based on input: *\"{fuzzy_text}\"*\n\n"
+            else:
+                return f"No ICD-10 semantic matches found for '{fuzzy_text}'. Please try a different query or provide a specific code."
+
         input_data = ConditionSearchInput(
-            patient=patient, code=code, clinical_status=clinical_status, 
-            category=category, onset_date=onset_date, _count=_count
+            patient=patient, code=code, fuzzy_text=fuzzy_text,
+            clinical_status=clinical_status, category=category, 
+            onset_date=onset_date, _count=_count
         )
-        return await _execute_fhir_search(fhir, "Condition", input_data)
+        
+        # Original FHIR search execution
+        raw_response = await _execute_fhir_search(fhir, "Condition", input_data)
+        
+        # 2. Financial & Translation Pipeline Enrichment (V3.1)
+        try:
+            # We add a note about the hcc data if we can find a code in the result
+            # Since map_bundle returns text, we'll look for codes inside it or use the top code
+            if code:
+                hcc = icd10_service.calculate_hcc_weight(code)
+                if hcc.hcc_impact:
+                    fuzzy_note += f"> [!NOTE]\n> **Financial Intelligence**: This diagnosis ({code}) has an HCC Impact Category of **{hcc.category}** (Weight: {hcc.weight})\n\n"
+            
+            return fuzzy_note + raw_response
+            
+        except Exception as e:
+            logger.error(f"Enrichment error: {str(e)}")
+            return fuzzy_note + raw_response
 
     @server.tool(name="search_observations", description=TOOL_DESCRIPTIONS["search_observations"])
     async def search_observations(

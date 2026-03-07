@@ -1,0 +1,49 @@
+# CLINICAL AUDIT & RESTORATION MANIFEST
+
+## 📑 Pathology Report: Live Site vs. Technical Brief
+The initial deployment to Vercel (`https://v3-ehr-simulator.vercel.app`) was successful at the React/Next.js hosting level but failed the "Pro Max" medical styling constraint audit.
+
+- **Expected:** High-Fidelity UI with 70/30 Grid layout, >44px touch targets, and medical-grade Tailwind CSS contrast.
+- **Actual:** "Plain" HTML. The Vercel build successfully generated the React JS but failed to process the Tailwind CSS directives, stripping all styling.
+- **Severity:** **CRITICAL**. A non-styled medical dashboard is functionally unusable and violates the Pro Max standard.
+
+- **Expected:** Debounced 300ms Search / API Service calls functional via `/api/v3`.
+- **Actual:** The `api.ts` file successfully passes the Next.js compilation, and the environment variables (`NEXT_PUBLIC_API_KEY`) were injected. The backend connection is awaiting CSS restoration to surface the input fields properly.
+- **Severity:** Stable, but masked by UI failure.
+
+### Root Cause Analysis (Dependency & Build Audit)
+1. **Missing PostCSS Config:** The `v3-ehr-simulator` folder lacks a `postcss.config.js` or `postcss.config.mjs` file. In Next.js App Router architectures, Tailwind CSS requires PostCSS to compile the `globals.css` file into browser-readable styles.
+2. **Missing `postcss` runtime module**: The Next.js compiler ignored the `@tailwind` directives in `globals.css` and passed the raw text to the browser.
+
+---
+
+## 🛠️ Step-by-Step Restoration Plan (Code-Level Treatment)
+
+### Task 1: Restore CSS Compilation Engine (Dependency Layer)
+The primary layout failure requires forcing the build engine to process Tailwind.
+
+- **Action:** Create `postcss.config.mjs` inside `v3-ehr-simulator`.
+```javascript
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+```
+- **Verification:** Run `npm run build`. The output logs must NOT show `"Unknown at rule @tailwind"` warnings.
+
+### Task 2: Fix Linting/Global CSS Injection
+- **Action:** Ensure `src/app/globals.css` is strictly imported in `src/app/layout.tsx`.
+- **Verification:** The local dev server (`npm run dev`) must render the 70/30 layout with background colors and grid structure intact.
+
+### Task 3: Re-Verify API Secret Flow
+- **Action:** Ensure the Intelligence Hub Axios layer attempts a request on startup (or via form input once UI is restored). If the backend is offline, the React state must degrade gracefully and display the Mock payload to prove the UI works.
+- **Verification:** Check the browser Network console for an `/icd10/suggest` request appending `X-API-KEY`.
+
+---
+
+## 🧪 Post-Fix Validation Checklist
+- [ ] 70/30 Split Layout Restored? (Sticky right sidebar holds `min-w-[350px]`)
+- [ ] Vitals Color-Coding Active? (CSS `bg-red-500` applied to critical vitals)
+- [ ] API Key Auth Passing? (Network XHR requests include the Gemini API key header)
