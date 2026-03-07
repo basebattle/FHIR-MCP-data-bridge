@@ -15,3 +15,12 @@ dist/
 build/
 *.egg-info/
 .DS_Store
+
+# V3 EHR Simulator
+v3-ehr-simulator/node_modules/
+v3-ehr-simulator/.next/
+v3-ehr-simulator/.vercel/
+v3-ehr-simulator/.pnp
+v3-ehr-simulator/.pnp.js
+v3-ehr-simulator/*.tsbuildinfo
+v3-ehr-simulator/next-env.d.ts

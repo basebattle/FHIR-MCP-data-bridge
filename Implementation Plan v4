@@ -1,0 +1,70 @@
+# V3.1 FRONTEND: THE EHR SIMULATOR (SMART-on-FHIR Ready)
+
+This plan outlines the frontend deployment of a pristine, high-fidelity "EHR Simulator" that maps live V3.1 FHIR/MCP data to professional medical dashboard components via Stich MCP and 21st.dev assets. The simulation emphasizes medical safety constraints ("UI-UX Pro Max"), zero broken links, and real-time Clinical Intelligence visibility in a dedicated 30% width Sidecar.
+
+## User Review Required
+
+> [!IMPORTANT]
+> - Ensure you agree with the 21st.dev component manifest outline.
+> - Verify the V4 Test & Validation Matrix covers all critical Hit-in-the-Loop workflows.
+
+## 1. Data-to-Design Mapping Report (Stich MCP Output)
+
+**Phase 0 Alignment Check:**
+The `ClinicalIntelligenceData` Pydantic model dictates the UI required in the intelligence hub. Key fields include:
+- `original`: Raw text extracted from FHIR resources (Mapped to Source Data View).
+- `system` & `mapped_icd10`: Suggested code (Mapped to ICD-10 Search & Suggestion Cards).
+- `hcc_data` (`hcc_impact`, `category`, `weight`, `description`): (Mapped to HCC Impact Badges).
+
+**FHIR Data Bridge Mapping:**
+- **Observation:** `valueQuantity` and `effectiveDateTime` mapped to **Vital Charts**.
+- **Condition:** `code` mapped to **Interactive Diagnosis List** in the main patient view.
+
+## 2. High-Fidelity UI Component Manifest (21st.dev Assets)
+
+Components exclusively sourced from verified, medical-grade 21st.dev assets:
+- **Main Patient Dashboard (70% Width):**
+  - **Vitals Overview Hero:** High-contrast visualization. Applies status color-coding (e.g., Red for Critical Out-of-Bounds).
+  - **Diagnosis Table:** Touch-optimized rows (>44px touch targets).
+
+- **Intelligence Hub Sidecar (30% Width):**
+  - **The "EHR Digital Twin" Layout Logic:** Designed to ensure the sidebar doesn't collapse on smaller screens.
+    - Used Tailwind classes: `w-[30%] min-w-[350px] sticky top-0 h-screen overflow-y-auto`
+  - **Semantic Search Bar:** Connects to `/api/v3/icd10/suggest`.
+  - **Clinical Validation Form:** Populates the `ClinicalValidation` model for HITL approval.
+
+## 3. Atomic React Service Layer & Interactive Logic
+
+- **API Client:** Use Axios in `src/services/api.ts` to explicitly define the structure and prevent CORS/header mismatches.
+  - Include the `X-API-KEY` in the common headers.
+  - Expose a `getSemanticSuggestions(query: string)` function that internally implements a **300ms debounce logic** to safeguard backend traffic and improve UX.
+- **Data Binding:** Real-time updates push `ClinicalIntelligenceData` structures directly into React state. 
+- **The "Approve & Add to Chart" Workflow:** Submits the `ClinicalValidation` model (with fields `code`, `status`, `clinician_id`, `timestamp`) accurately back to the V3.1 FHIR bridge.
+
+## 4. Pristine Experience Checklist (Zero-Broken-Link Policy)
+
+- [ ] **Touch Targets:** All interactive elements must exceed Apple/Google accessibility guidelines (>44px padding/margin combinations).
+- [ ] **Color Theory:** Strict application of high-contrast modes for readable clinical settings.
+- [ ] **Refined Error & Empty States:**
+  - `SuggestionCard` component handles three explicit states: **Loading**, **Success (Data)**, and **No Results**.
+  - If `results.length === 0`, render a card stating *"No clinical matches found. Try a different term or manual entry"* with a high-contrast info icon.
+- [ ] **Error/Empty States:** Explicit "Coming Soon" or defined feedback overlays for features not fully implemented to ensure zero perceived broken links.
+
+## 5. Local Execution & Hosting Guide (Vercel + Python Backend)
+
+- **Frontend Hosting (Vercel):** Seamless continuous deployment connected to the React + Tailwind framework repository.
+- **Backend Connection:** Environment variables strict locked to the V3.1 Dual-Protocol Hub (`NEXT_PUBLIC_API_URL=http://localhost:8000/api/v3`).
+
+## Verification Plan
+
+### Test & Validation Matrix (V4 Series)
+
+| Test ID | Scenario | Expected Outcome (Pristine Standard) |
+| :--- | :--- | :--- |
+| **V4-01** | Rapid Typing in Search | Backend logs show a single cached request (0.16ms) after typing stops, not a request for every keystroke. |
+| **V4-02** | Invalid API Key | Frontend displays a "Security/Access Error" overlay rather than a blank screen or a console-only error. |
+| **V4-03** | HITL Submission | The payload sent to `/api/v3/validate` strictly includes `clinician_id` and `status`. |
+
+### Manual Verification
+- **Sidebar Width Check:** Inspect layout under varying viewport sizes to ensure the Sidecar accurately holds its `min-w-[350px]` boundary.
+- **Zero Break Link Demo:** Click every button in the interface to trigger the expected handler or 'Coming Soon' overlay.
