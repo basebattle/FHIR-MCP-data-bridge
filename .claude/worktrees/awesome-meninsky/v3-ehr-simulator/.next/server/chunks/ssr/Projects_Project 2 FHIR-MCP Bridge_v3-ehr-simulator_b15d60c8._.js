@@ -1,3 +1,0 @@
-module.exports=[51843,a=>{a.n(a.i(20431))},37098,a=>{a.n(a.i(98951))},74600,a=>{a.n(a.i(63463))},84004,a=>{a.n(a.i(14796))},65848,a=>{a.n(a.i(50942))},50942,(a,b,c)=>{"use strict";Object.defineProperty(c,"__esModule",{value:!0}),Object.defineProperty(c,"default",{enumerable:!0,get:function(){return f}});let d=a.r(22758),e=a.r(92686);function f(){return(0,d.jsx)(e.HTTPAccessErrorFallback,{status:401,message:"You're not authorized to access this page."})}("function"==typeof c.default||"object"==typeof c.default&&null!==c.default)&&void 0===c.default.__esModule&&(Object.defineProperty(c.default,"__esModule",{value:!0}),Object.assign(c.default,c),b.exports=c.default)}];
-
-//# sourceMappingURL=Projects_Project%202%20FHIR-MCP%20Bridge_v3-ehr-simulator_b15d60c8._.js.map
