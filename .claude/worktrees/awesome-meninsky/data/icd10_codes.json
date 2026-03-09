@@ -1,0 +1,43 @@
+[
+    {
+        "code": "E11.9",
+        "display": "Type 2 diabetes mellitus without complications",
+        "keywords": [
+            "diabetes",
+            "type 2",
+            "dm2",
+            "t2dm",
+            "niddm",
+            "adult onset"
+        ]
+    },
+    {
+        "code": "I10",
+        "display": "Essential (primary) hypertension",
+        "keywords": [
+            "hypertension",
+            "high blood pressure",
+            "hbp",
+            "htn"
+        ]
+    },
+    {
+        "code": "F33.1",
+        "display": "Major depressive disorder, recurrent, moderate",
+        "keywords": [
+            "depression",
+            "depressive",
+            "major depressive"
+        ]
+    },
+    {
+        "code": "E78.5",
+        "display": "Hyperlipidemia, unspecified",
+        "keywords": [
+            "cholesterol",
+            "high cholesterol",
+            "lipids",
+            "hyperlipidemia"
+        ]
+    }
+]

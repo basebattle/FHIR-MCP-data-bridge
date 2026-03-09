@@ -1,0 +1,27 @@
+[
+    {
+        "code": "860975",
+        "display": "Metformin hydrochloride 500 MG Oral Tablet",
+        "keywords": [
+            "metformin",
+            "glucophage"
+        ]
+    },
+    {
+        "code": "311354",
+        "display": "Lisinopril 10 MG Oral Tablet",
+        "keywords": [
+            "lisinopril",
+            "prinivil",
+            "zestril"
+        ]
+    },
+    {
+        "code": "259255",
+        "display": "Atorvastatin 20 MG Oral Tablet",
+        "keywords": [
+            "atorvastatin",
+            "lipitor"
+        ]
+    }
+]

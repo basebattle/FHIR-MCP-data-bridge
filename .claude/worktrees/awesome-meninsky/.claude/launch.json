@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "EHR Simulator (Next.js)",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "cd v3-ehr-simulator && ./node_modules/.bin/next dev"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "FHIR-MCP Hub (FastAPI)",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["run_server.py"],
+      "port": 8000
+    }
+  ]
+}

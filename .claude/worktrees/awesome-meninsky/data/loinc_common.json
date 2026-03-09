@@ -1,0 +1,37 @@
+[
+    {
+        "code": "4548-4",
+        "display": "Hemoglobin A1c/Hemoglobin.total in Blood",
+        "keywords": [
+            "hba1c",
+            "a1c",
+            "glycated hemoglobin",
+            "diabetes"
+        ]
+    },
+    {
+        "code": "2339-0",
+        "display": "Glucose [Mass/volume] in Blood",
+        "keywords": [
+            "glucose",
+            "blood sugar"
+        ]
+    },
+    {
+        "code": "8480-6",
+        "display": "Systolic blood pressure",
+        "keywords": [
+            "blood pressure",
+            "systolic",
+            "sbp"
+        ]
+    },
+    {
+        "code": "2093-3",
+        "display": "Cholesterol [Mass/volume] in Serum or Plasma",
+        "keywords": [
+            "cholesterol",
+            "total cholesterol"
+        ]
+    }
+]

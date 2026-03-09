@@ -1,0 +1,3 @@
+module.exports=[98951,a=>{"use strict";var b=a.i(22758);function c({children:a}){return(0,b.jsx)("html",{lang:"en",children:(0,b.jsx)("body",{children:a})})}a.s(["default",()=>c,"metadata",0,{title:"V3.1 EHR Simulator | Intelligence Hub",description:"High-fidelity Clinical Intelligence Dashboard"}])}];
+
+//# sourceMappingURL=Projects_Project%202%20FHIR-MCP%20Bridge_v3-ehr-simulator_src_app_layout_tsx_e35eb0be._.js.map

@@ -1,0 +1,13 @@
+var R=require("../../chunks/ssr/[turbopack]_runtime.js")("server/app/_not-found/page.js")
+R.c("server/chunks/ssr/Projects_Project 2 FHIR-MCP Bridge_v3-ehr-simulator_b15d60c8._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__71b156a1._.js")
+R.c("server/chunks/ssr/c432a_next_dist_esm_build_templates_app-page_6b58f7d1.js")
+R.c("server/chunks/ssr/[root-of-the-server]__f9e63039._.js")
+R.c("server/chunks/ssr/c432a_next_dist_b9ff404b._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__c4863835._.js")
+R.c("server/chunks/ssr/Projects_Project 2 FHIR-MCP Bridge_v3-ehr-simulator_src_app_layout_tsx_e35eb0be._.js")
+R.c("server/chunks/ssr/c432a_next_dist_client_components_b516e097._.js")
+R.c("server/chunks/ssr/c432a_next_dist_client_components_builtin_forbidden_4ad8fade.js")
+R.c("server/chunks/ssr/ae284_v3-ehr-simulator__next-internal_server_app__not-found_page_actions_1b9dc8e3.js")
+R.m(64067)
+module.exports=R.m(64067).exports

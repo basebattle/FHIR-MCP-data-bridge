@@ -1,0 +1,18 @@
+[
+    {
+        "code": "44054006",
+        "display": "Type 2 diabetes mellitus",
+        "keywords": [
+            "diabetes",
+            "type 2 diabetes"
+        ]
+    },
+    {
+        "code": "38341003",
+        "display": "Hypertension",
+        "keywords": [
+            "hypertension",
+            "high blood pressure"
+        ]
+    }
+]

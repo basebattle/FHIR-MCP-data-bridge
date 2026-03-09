@@ -1,0 +1,26 @@
+{
+    "E11.9": {
+        "hcc_impact": true,
+        "category": "Diabetes",
+        "weight": 0.104,
+        "description": "Type 2 diabetes mellitus without complications"
+    },
+    "I21.9": {
+        "hcc_impact": true,
+        "category": "Acute Myocardial Infarction",
+        "weight": 0.25,
+        "description": "Acute myocardial infarction, unspecified"
+    },
+    "I25.10": {
+        "hcc_impact": true,
+        "category": "Chronic Ischemic Heart Disease",
+        "weight": 0.15,
+        "description": "Atherosclerotic heart disease of native coronary artery without angina pectoris"
+    },
+    "C34.90": {
+        "hcc_impact": true,
+        "category": "Lung Cancer",
+        "weight": 0.45,
+        "description": "Malignant neoplasm of unspecified part of unspecified bronchus or lung"
+    }
+}
