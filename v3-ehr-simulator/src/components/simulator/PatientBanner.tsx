@@ -42,7 +42,7 @@ export function PatientBanner({ scenario, className }: PatientBannerProps) {
                         <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-muted-foreground font-medium">
                             <span className="flex items-center gap-1.5 leading-none">
                                 <Calendar size={14} className="text-primary/60" />
-                                DOB: {patient.dob} ({patient.gender === 'male' ? 'M' : 'F'})
+                                DOB: {patient.dob} ({patient.sex === 'male' ? 'M' : 'F'})
                             </span>
                             <span className="flex items-center gap-1.5 leading-none">
                                 <Activity size={14} className="text-primary/60" />
