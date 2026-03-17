@@ -62,6 +62,11 @@ class FHIRClient:
                     auth_headers = await self.auth.get_auth_header()
                     headers.update(auth_headers)
                     response = await client.request(method, url, headers=headers, **kwargs)
+                    
+                    if response.status_code == 401:
+                        raise FHIRAuthError("Authentication failed after token refresh retry.", details=response.text)
+                else:
+                    raise FHIRAuthError("Authentication failed (401 Unauthorized) and authorization is disabled.", details=response.text)
 
             if response.status_code == 404:
                 raise FHIRNotFoundError(f"Resource not found at {url}")

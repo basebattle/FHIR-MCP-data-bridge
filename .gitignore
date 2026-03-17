@@ -1,0 +1,9 @@
+.claude/
+_revisions/
+__pycache__/
+*.pyc
+node_modules/
+.next/
+dist/
+.env*
+! .env.example

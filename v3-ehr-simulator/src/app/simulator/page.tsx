@@ -1,296 +1,255 @@
-'use client';
+"use client";
 
-import { useDemoOrchestrator } from '@/hooks/useDemoOrchestrator';
-import { ALL_SCENARIOS } from '@/data/clinicalScenarios';
-import { DemoProgressBar } from '@/components/DemoProgressBar';
-import { PatientTimeline } from '@/components/PatientTimeline';
-import { AgentPlan } from '@/components/AgentPlan';
-import { DataStream } from '@/components/DataStream';
-import { Sparkline } from '@/components/Sparkline';
-import { useState, useEffect } from 'react';
-import { useTheme } from 'next-themes';
-import Link from 'next/link';
-import {
-  Play, RotateCcw, ChevronLeft, ChevronRight,
-  Moon, Sun, Zap, MessageCircle, CheckCircle2, Circle, Activity
-} from 'lucide-react';
+import React, { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { useDemoOrchestrator } from "@/hooks/useDemoOrchestrator";
+import { PatientBanner } from "@/components/simulator/PatientBanner";
+import { VitalsGrid } from "@/components/simulator/VitalsGrid";
+import { SearchTerminal } from "@/components/simulator/SearchTerminal";
+import { ReasoningGraph } from "@/components/simulator/ReasoningGraph";
+import IntelligentSidebar from "@/components/Sidebar/IntelligentSidebar";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronRight, Play, RotateCcw, AlertTriangle, CheckCircle2, FlaskConical, ClipboardList } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function SimulatorPage() {
-  const { state, currentStep, totalSteps, progressPct, startDemo, nextStep, prevStep, reset } = useDemoOrchestrator();
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const searchParams = useSearchParams();
+  const scenarioId = searchParams.get("scenario");
+  const { state, startDemo, advancePhase, reset } = useDemoOrchestrator();
 
-  useEffect(() => { setMounted(true); }, []);
-  if (!mounted) return null;
+  useEffect(() => {
+    if (scenarioId && state.phase === 'idle') {
+      startDemo(scenarioId);
+    }
+  }, [scenarioId, state.phase, startDemo]);
 
-  const scenario = state.scenario;
-  const isActive = state.isActive;
-  const isComplete = state.phase === 'complete';
-  const stepType = currentStep?.type;
-
-  const showRightPanel = stepType === 'search' || stepType === 'reasoning' || stepType === 'hitl' || state.demoSearchQuery || state.visibleReasoningSteps.length > 0;
+  if (state.phase === 'idle') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
+        <div className="w-20 h-20 rounded-3xl bg-muted flex items-center justify-center text-muted-foreground animate-pulse">
+          <FlaskConical size={40} />
+        </div>
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-2">No Scenario Loaded</h2>
+          <p className="text-muted-foreground">Please select a scenario from the library to begin.</p>
+        </div>
+        <a href="/" className="px-6 py-3 rounded-2xl bg-primary text-white font-bold hover:scale-105 transition-transform">
+          Return to Library
+        </a>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full min-h-screen bg-[var(--background)] flex">
-      {/* ── LEFT NAVIGATION RAIL (Superdesign Stepper) ────────────────── */}
-      {isActive && (
-        <aside className="w-72 border-r border-[var(--border-subtle)] bg-[var(--surface-0)] flex flex-col shrink-0">
-          <div className="p-6 border-b border-[var(--border-subtle)]">
-            <Link href="/" className="flex items-center gap-2 mb-6">
-              <div className="w-6 h-6 bg-[var(--primary)] rounded flex items-center justify-center">
-                <span className="text-white font-bold text-xs">FM</span>
-              </div>
-              <span className="font-bold text-sm tracking-tight text-[var(--foreground)]">FHIR-MCP Bridge</span>
-            </Link>
-            <p className="text-2xs font-bold uppercase tracking-clinical text-[var(--muted-foreground)]">Workflow Progress</p>
-          </div>
+    <div className="flex h-screen bg-background overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-y-auto">
+        <PatientBanner scenario={state.scenario} />
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-1">
-            {state.steps.map((step, idx) => {
-              const isPast = idx < state.currentStepIndex;
-              const isCurrent = idx === state.currentStepIndex;
+        <main className="flex-1 p-6 max-w-7xl mx-auto w-full flex flex-col gap-6">
+          {/* Progress Bar */}
+          <div className="w-full flex items-center gap-4 mb-4">
+            {['intake', 'vitals', 'events', 'analysis', 'hitl', 'complete'].map((p, i) => {
+              const activeIdx = ['intake', 'vitals', 'events', 'analysis', 'hitl', 'complete'].indexOf(state.phase);
+              const isPast = activeIdx > i;
+              const isCurrent = activeIdx === i;
+
               return (
-                <div
-                  key={idx}
-                  className={`flex items-center gap-3 p-3 rounded-lg transition-all ${isCurrent ? 'bg-[var(--primary)]/10 text-[var(--primary)]' : 'text-[var(--muted-foreground)]'}`}
-                >
-                  <div className="flex-shrink-0">
-                    {isPast ? (
-                      <CheckCircle2 size={16} className="text-green-500" />
-                    ) : isCurrent ? (
-                      <div className="w-4 h-4 rounded-full border-2 border-[var(--primary)] flex items-center justify-center">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] animate-pulse" />
-                      </div>
-                    ) : (
-                      <Circle size={16} className="opacity-20" />
-                    )}
-                  </div>
-                  <span className={`text-[11px] font-black uppercase tracking-widest leading-tight ${isCurrent ? 'opacity-100' : 'opacity-40'}`}>{step.title}</span>
+                <div key={p} className="flex-1 flex flex-col gap-2">
+                  <div className={cn(
+                    "h-1.5 rounded-full transition-all duration-500",
+                    isPast ? "bg-clinical-nominal" : isCurrent ? "bg-primary" : "bg-muted"
+                  )} />
+                  <span className={cn(
+                    "text-[9px] uppercase font-bold tracking-widest",
+                    isCurrent ? "text-primary" : "text-muted-foreground"
+                  )}>{p}</span>
                 </div>
               );
             })}
           </div>
 
-          <div className="p-4 border-t border-[var(--border-subtle)]">
-            <button onClick={reset} className="w-full flex items-center justify-center gap-2 py-2 text-xs font-bold text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
-              <RotateCcw size={12} /> Reset System
-            </button>
-          </div>
-        </aside>
-      )}
+          {/* Phase Layouts */}
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[500px]">
 
-      {/* ── MAIN WORKSPACE ────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col min-h-screen">
-        {/* Header */}
-        <header className="frosted-nav px-6 py-4">
-          <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            <div>
-              {!isActive && (
-                <Link href="/" className="font-bold text-sm hover:text-[var(--primary)] transition-colors">
-                  ← Back to Landing
-                </Link>
-              )}
-              {scenario && (
-                <div className="flex items-center gap-2">
-                  <Activity size={14} className="text-[var(--primary)]" />
-                  <p className="text-xs font-black text-[var(--foreground)] uppercase tracking-widest">{scenario.name}</p>
-                </div>
-              )}
-            </div>
-            <div className="flex items-center gap-4">
-              {isActive && <DemoProgressBar currentStep={state.currentStepIndex} totalSteps={totalSteps} />}
-              <button
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="p-2 rounded-lg border border-[var(--border-subtle)] hover:bg-[var(--muted)] transition-colors"
-              >
-                {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-              </button>
-            </div>
-          </div>
-        </header>
-
-        {/* Workspace Body */}
-        <main className="flex-1 max-w-6xl mx-auto px-6 py-6 w-full">
-          {/* IDLE: Rich Vertical Scenario Selection */}
-          {!isActive && !scenario && (
-            <div className="max-w-3xl mx-auto py-12">
-              <div className="mb-12 text-center">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--card)] text-[10px] font-black uppercase tracking-[0.2em] mb-6">
-                  <Zap size={10} className="text-[var(--primary)]" />
-                  Clinical Protocol Selection
-                </div>
-                <h1 className="text-4xl font-black mb-4 tracking-tighter text-[var(--foreground)]">Choose AI Logic Path</h1>
-                <p className="text-[var(--muted-foreground)]">Select a verified clinical scenario to begin the step-by-step engine walkthrough.</p>
-              </div>
-
-              <div className="space-y-4">
-                {ALL_SCENARIOS.map(s => (
-                  <button
-                    key={s.id}
-                    onClick={() => startDemo(s.id)}
-                    className="wizard-card w-full text-left group flex items-start gap-6 p-6 hover:shadow-xl transition-all"
+            {/* Left Column: Context & Evidence */}
+            <div className="lg:col-span-8 flex flex-col gap-6">
+              <AnimatePresence mode="wait">
+                {state.phase === 'intake' || state.phase === 'vitals' || state.phase === 'events' ? (
+                  <motion.div
+                    key="vitals-section"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    className="space-y-6"
                   >
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-xs font-black text-[var(--primary)] uppercase tracking-widest">{s.id.replace(/-/g, ' ')}</p>
-                        <ChevronRight size={16} className="text-[var(--muted-foreground)] group-hover:translate-x-1 transition-transform" />
-                      </div>
-                      <h2 className="text-xl font-bold mb-2 text-[var(--foreground)]">{s.name}</h2>
-                      <p className="text-sm text-[var(--muted-foreground)] mb-4">{s.tagline}</p>
+                    <VitalsGrid vitals={state.scenario?.vitals || []} />
 
-                      {/* Industrial ASCII Data Preview */}
-                      <pre className="select-none">
-                        {`[NODE_INFO] status: READY\n[BRIDGE] fhir_r4 -> mcp_v3\n[TRACE] auth_check: true\n[DATA] ${s.patient.firstName.charAt(0)}_${s.patient.mrn.slice(-4)}`}
-                      </pre>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ACTIVE WORKSPACE */}
-          {scenario && isActive && (
-            <div className="space-y-8 animate-fade-in">
-              {/* Pro Max Speech Bubble */}
-              {!isComplete && currentStep && (
-                <div className="speech-bubble relative overflow-hidden border-2 shadow-2xl">
-                  <div className="absolute top-0 left-0 w-1 h-full bg-[var(--primary)]" />
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-[var(--primary)] flex items-center justify-center shrink-0">
-                      <MessageCircle size={18} className="text-white" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--primary)] mb-1.5">
-                        {currentStep.title}
-                      </p>
-                      <p className="text-base font-medium text-[var(--foreground)] leading-relaxed">
-                        {currentStep.narration}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Multi-Column Data View */}
-              <div className={`grid gap-8 ${showRightPanel ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1'}`}>
-                <div className={`space-y-6 ${showRightPanel ? 'lg:col-span-2' : ''}`}>
-                  {/* Patient Identity */}
-                  <div className="wizard-card active p-6 bg-gradient-to-br from-[var(--surface-1)] to-[rgba(33,33,33,1)]">
-                    <div className="grid grid-cols-2 gap-8">
-                      <div>
-                        <p className="text-2xs font-bold uppercase tracking-[0.15em] text-[var(--primary)] mb-2">Subject Identifier</p>
-                        <h2 className="text-2xl font-black tracking-tight">{scenario.patient.firstName} {scenario.patient.name}</h2>
-                        <div className="flex gap-3 mt-2 text-[10px] font-bold text-[var(--muted-foreground)] uppercase">
-                          <span>MRN: {scenario.patient.mrn}</span>
-                          <span>•</span>
-                          <span>{scenario.patient.sex}</span>
-                          <span>•</span>
-                          <span>{scenario.patient.dob}</span>
-                        </div>
-                      </div>
-                      <div className="border-l border-[var(--border-subtle)] pl-8">
-                        <p className="text-2xs font-bold uppercase tracking-[0.15em] text-[var(--primary)] mb-2">Clinical Context</p>
-                        <h2 className="text-lg font-bold leading-tight mb-2">{scenario.name}</h2>
-                        <pre className="text-[9px] opacity-40 selection:bg-orange-500/30">
-                          {`protocol_id: ${scenario.id.toUpperCase()}\nengine_v: 3.1_f\nstatus: ACTIVE`}
-                        </pre>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Operational Telemetry (Vitals) */}
-                  {state.currentStepIndex >= 1 && (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {scenario.vitals.map((vital, i) => (
-                        <div key={i} className="wizard-card p-4 hover:shadow-md">
-                          <p className="text-[10px] font-black uppercase tracking-widest text-[var(--muted-foreground)] mb-1">{vital.label}</p>
-                          <p className="text-xl font-black">{vital.value} <span className="text-xs font-medium text-[var(--muted-foreground)] normal-case">{vital.unit}</span></p>
-                          <div className="mt-3 opacity-60">
-                            <Sparkline
-                              data={vital.history.map((v, j) => ({ time: `t${j}`, value: v }))}
-                              status={vital.status}
-                              height={18}
-                            />
+                    {/* Timeline Events Column */}
+                    <div className="bg-card border border-border rounded-[2rem] p-8 min-h-[300px]">
+                      <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-2">
+                        <ClipboardList size={16} />
+                        Clinical Event Stream
+                      </h3>
+                      <div className="space-y-4">
+                        {state.visibleEvents.length === 0 && (
+                          <div className="h-40 flex items-center justify-center border-2 border-dashed border-border rounded-2xl text-muted-foreground italic text-sm">
+                            Awaiting timeline triggers...
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Event Stream */}
-                  {state.visibleEvents.length > 0 && (
-                    <div className="space-y-4">
-                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-[var(--muted-foreground)]">Protocol Timeline</h3>
-                      <PatientTimeline events={state.visibleEvents} />
-                    </div>
-                  )}
-
-                  {/* HITL Completion UI */}
-                  {isComplete && (
-                    <div className="wizard-card active p-10 text-center border-green-500 shadow-green-500/10">
-                      <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <CheckCircle2 size={32} className="text-white" />
+                        )}
+                        {state.visibleEvents.map((event, idx) => (
+                          <motion.div
+                            key={event.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className={cn(
+                              "p-4 rounded-2xl border flex gap-4 items-start transition-all",
+                              event.severity === 'critical' ? "bg-clinical-critical/[0.03] border-clinical-critical/20" : "bg-muted/50 border-border"
+                            )}
+                          >
+                            <div className={cn(
+                              "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                              event.severity === 'critical' ? "bg-clinical-critical/10 text-clinical-critical" : "bg-primary/10 text-primary"
+                            )}>
+                              <AlertTriangle size={20} />
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-[10px] font-bold font-mono text-muted-foreground">{event.time}</span>
+                                <h4 className="font-bold text-sm">{event.title}</h4>
+                              </div>
+                              <p className="text-xs text-muted-foreground leading-relaxed">{event.body}</p>
+                              {event.mcpTool && (
+                                <div className="mt-2 text-[9px] font-mono font-bold text-primary/60 uppercase">
+                                  EXEC: {event.mcpTool}()
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
+                        ))}
                       </div>
-                      <h3 className="text-3xl font-black text-[var(--foreground)] mb-2">Simulation Success</h3>
-                      <p className="text-[var(--muted-foreground)] mb-8">All FHIR/MCP resources finalized and clinical record synchronized.</p>
-                      <button onClick={reset} className="inline-flex items-center gap-2 px-8 py-3 bg-[var(--primary)] text-white font-bold rounded-lg hover:shadow-xl transition-all">
-                        <RotateCcw size={16} /> Run New Sequence
-                      </button>
                     </div>
-                  )}
+                  </motion.div>
+                ) : state.phase === 'analysis' || state.phase === 'hitl' || state.phase === 'complete' ? (
+                  <motion.div
+                    key="analysis-section"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 1.02 }}
+                    className="flex flex-col gap-6 h-full"
+                  >
+                    <SearchTerminal
+                      query={state.scenario?.demoSearchQuery || ""}
+                      isAnalyzing={state.phase === 'analysis'}
+                      className="flex-1"
+                    />
+                    <ReasoningGraph
+                      steps={state.scenario?.reasoningSteps || []}
+                      className="h-[300px]"
+                    />
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+            </div>
+
+            {/* Right Column: AI Insights & Controls */}
+            <div className="lg:col-span-4 flex flex-col gap-6">
+              <div className="p-8 rounded-[2rem] bg-card border border-border shadow-sm flex-1 flex flex-col">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-8">Simulation Control</h3>
+
+                {/* Status Indicator */}
+                <div className="mb-8 p-4 rounded-2xl bg-muted/50 border border-border flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-muted-foreground">Phase Status</span>
+                    <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase truncate max-w-[100px]">
+                      {state.phase}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-muted-foreground">Auto-Advance</span>
+                    <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full uppercase", state.isAutoAdvance ? "text-clinical-nominal bg-clinical-nominal/10" : "text-muted-foreground bg-muted")}>
+                      {state.isAutoAdvance ? "Enabled" : "Paused"}
+                    </span>
+                  </div>
                 </div>
 
-                {/* Intelligence Side Column */}
-                {showRightPanel && (
-                  <div className="space-y-6">
-                    {state.demoSearchQuery && (
-                      <div className="space-y-3">
-                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-[var(--muted-foreground)]">Knowledge Retrieval</h3>
-                        <DataStream query={state.demoSearchQuery} />
-                      </div>
-                    )}
-                    {state.visibleReasoningSteps.length > 0 && (
-                      <div className="space-y-3">
-                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-[var(--muted-foreground)]">AI Decision Logic</h3>
-                        <AgentPlan steps={state.visibleReasoningSteps} highlightApprove={state.showHitl} />
-                      </div>
-                    )}
-                  </div>
-                )}
+                <div className="space-y-4 mt-auto">
+                  <button
+                    onClick={advancePhase}
+                    className="w-full py-4 rounded-2xl bg-foreground text-background font-bold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  >
+                    {state.phase === 'hitl' ? "Confirm Final Diagnosis" : "Skip to Next Phase"}
+                    <Play size={18} fill="currentColor" />
+                  </button>
+                  <button
+                    onClick={reset}
+                    className="w-full py-4 rounded-2xl border border-border font-bold flex items-center justify-center gap-2 hover:bg-muted transition-colors text-muted-foreground"
+                  >
+                    Reset Simulation
+                    <RotateCcw size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Dynamic Suggestion Card (Placeholder for Intelligence) */}
+              <div className="p-6 rounded-[2rem] bg-gradient-to-br from-primary/10 to-transparent border border-primary/20">
+                <div className="flex items-center gap-2 mb-4">
+                  <CheckCircle2 size={18} className="text-primary" />
+                  <span className="text-xs font-bold uppercase tracking-widest text-primary">Inference Confidence</span>
+                </div>
+                <div className="text-3xl font-mono font-bold text-foreground mb-1">94.2%</div>
+                <p className="text-xs text-muted-foreground font-medium">Matching scenario markers against SNOMED-CT clinical terminology engine.</p>
               </div>
             </div>
-          )}
+          </div>
         </main>
-
-        {/* ── STICKY NAVIGATION FOOTER (Superdesign Style) ─────────── */}
-        {isActive && !isComplete && (
-          <footer className="demo-footer">
-            <div className="max-w-6xl mx-auto flex items-center justify-between">
-              <button
-                onClick={prevStep}
-                disabled={state.currentStepIndex <= 0}
-                className="px-6 py-2.5 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-0)] text-[10px] font-black uppercase tracking-[0.15em] disabled:opacity-20 hover:bg-[var(--muted)] transition-all"
-              >
-                ← Back
-              </button>
-
-              <div className="flex items-center gap-1.5">
-                {state.steps.map((_, i) => (
-                  <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i === state.currentStepIndex ? 'w-6 bg-[var(--primary)]' : i < state.currentStepIndex ? 'bg-green-500' : 'bg-[var(--border-subtle)]'}`} />
-                ))}
-              </div>
-
-              <button
-                onClick={nextStep}
-                className="px-8 py-2.5 rounded-full bg-[var(--primary)] text-white text-[10px] font-black uppercase tracking-[0.15em] hover:shadow-xl hover:shadow-[var(--primary)]/20 transition-all active:scale-95"
-              >
-                {state.currentStepIndex === state.steps.length - 1 ? 'Finish' : 'Next →'}
-              </button>
-            </div>
-          </footer>
-        )}
       </div>
+
+      <IntelligentSidebar />
+
+      {/* HITL / Final Completion Interstitial Overlay */}
+      <AnimatePresence>
+        {state.phase === 'complete' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 z-50 bg-background/80 backdrop-blur-xl flex items-center justify-center p-6"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              className="max-w-md w-full bg-card border border-border rounded-[2.5rem] p-10 shadow-2xl text-center"
+            >
+              <div className="w-20 h-20 rounded-full bg-clinical-nominal/10 text-clinical-nominal flex items-center justify-center mx-auto mb-8">
+                <CheckCircle2 size={48} />
+              </div>
+              <h2 className="text-3xl font-bold mb-4">Workflow Confirmed</h2>
+              <p className="text-muted-foreground mb-8 leading-relaxed">
+                The clinical reasoning cycle is complete. All confirmatory records have been pushed to the FHIR repository.
+              </p>
+              <div className="bg-muted/50 rounded-2xl p-6 mb-10 text-left space-y-3">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-bold text-muted-foreground">AUDIT ID</span>
+                  <span className="font-mono text-primary truncate max-w-[150px]">{state.auditId}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-bold text-muted-foreground">LATENCY</span>
+                  <span className="font-mono">14.2s (Aggregate)</span>
+                </div>
+              </div>
+              <button
+                onClick={reset}
+                className="w-full py-4 rounded-2xl bg-primary text-white font-bold text-lg hover:scale-105 transition-transform shadow-xl shadow-primary/20"
+              >
+                Run New Simulation
+              </button>
+              <a href="/" className="block mt-6 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors">
+                Exit to Library
+              </a>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+```

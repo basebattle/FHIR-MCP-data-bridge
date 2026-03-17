@@ -1,10 +1,8 @@
 import React from 'react';
-import { Check, AlertCircle } from 'lucide-react';
+import { Check, AlertCircle, TrendingUp, ArrowRight } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { motion } from 'framer-motion';
 
-/* ─────────────────────────────────────────────────────────────────
-   Types
-   ───────────────────────────────────────────────────────────────── */
 export interface ClinicalIntelligenceData {
     original: string;
     system: string;
@@ -24,137 +22,96 @@ interface SuggestionCardProps {
     onApprove?: (data: ClinicalIntelligenceData) => void;
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   SuggestionCard
-   ───────────────────────────────────────────────────────────────── */
 const SuggestionCard: React.FC<SuggestionCardProps> = ({ data, isLoading, onApprove }) => {
-
-    /* ── Loading skeleton ──────────────────────────────────────── */
     if (isLoading) {
         return (
             <div className={cn(
-                'p-3 rounded-lg border border-[var(--border-subtle)]',
-                'bg-[var(--surface-1)] mb-3 animate-shimmer',
-                'h-[148px] flex items-center justify-center',
+                'p-5 rounded-2xl border border-border bg-card mb-3 animate-shimmer h-[160px] flex items-center justify-center',
             )}>
-                <span className="text-xs text-[var(--text-tertiary)] font-medium">
-                    Analyzing clinical context…
+                <span className="text-xs text-muted-foreground font-bold uppercase tracking-widest">
+                    Inferencing Context...
                 </span>
             </div>
         );
     }
 
-    /* ── Empty / null state ────────────────────────────────────── */
-    if (!data) {
-        return (
-            <div className={cn(
-                'p-4 rounded-lg border border-dashed border-[var(--border-strong)]',
-                'bg-[var(--surface-0)] mb-3',
-                'flex flex-col items-center text-center gap-2',
-            )}>
-                <div className="w-10 h-10 rounded-full bg-accent/8 border border-accent/15 flex items-center justify-center">
-                    <AlertCircle size={16} className="text-accent/60" />
-                </div>
-                <p className="text-sm font-semibold text-[var(--text-secondary)]">
-                    No clinical matches found
-                </p>
-                <p className="text-xs text-[var(--text-tertiary)]">
-                    Try a different term or manual entry.
-                </p>
-            </div>
-        );
-    }
+    if (!data) return null;
 
     const isHccRisk = data.hcc_data.hcc_impact;
 
-    /* ── Populated card ────────────────────────────────────────── */
     return (
         <div
             className={cn(
-                'group relative rounded-lg border',
-                'bg-white overflow-hidden mb-3',
-                'hover:shadow-sm transition-all duration-200 ease-out',
-                isHccRisk ? 'border-red-200 hover:border-red-300' : 'border-slate-200 hover:border-slate-300',
+                'group relative rounded-[1.5rem] border transition-all duration-300',
+                'bg-card overflow-hidden mb-3 hover:shadow-xl hover:shadow-primary/5',
+                isHccRisk ? 'border-clinical-critical/20 bg-clinical-critical/[0.01]' : 'border-border hover:border-primary/40',
             )}
             role="article"
-            aria-label={`Clinical suggestion: ${data.original}`}
         >
-            {/* Left accent bar — red for HCC risk, green for nominal */}
-            <div
-                className={cn(
-                    'absolute top-0 left-0 w-[3px] h-full rounded-l-lg',
-                    isHccRisk ? 'bg-red-500' : 'bg-emerald-500',
-                )}
-                aria-hidden="true"
-            />
-
-            <div className="pl-3 pr-3 pt-3 pb-2">
-
-                {/* Top row — source label + HCC badge */}
-                <div className="flex items-start justify-between gap-2 mb-2.5">
+            <div className="p-5">
+                {/* Header Info */}
+                <div className="flex items-start justify-between gap-3 mb-4">
                     <div className="min-w-0">
-                        <span className="text-2xs font-bold uppercase tracking-clinical text-[var(--muted-foreground)] block mb-0.5">
+                        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground block mb-1">
                             {data.system}
                         </span>
-                        <p className="text-sm font-semibold text-[var(--foreground)] leading-tight truncate">
+                        <p className="text-sm font-bold text-foreground leading-tight truncate">
                             {data.original}
                         </p>
                     </div>
-                    {isHccRisk && (
-                        <span className={cn(
-                            'shrink-0 text-2xs font-bold uppercase px-2 py-0.5 rounded-full',
-                            'bg-red-500/10 text-red-400 border border-red-500/20',
-                            'flex items-center gap-1',
-                        )}>
-                            <span className="w-1 h-1 rounded-full bg-red-500 animate-pulse" />
-                            HCC Risk
-                        </span>
-                    )}
                 </div>
 
-                {/* Data grid */}
-                <div className="grid grid-cols-2 gap-2 mb-3">
-                    <div className="bg-[var(--surface-1)] rounded-md p-2 border border-[var(--border-subtle)]">
-                        <span className="text-2xs font-bold uppercase tracking-clinical text-[var(--muted-foreground)] block mb-0.5">
-                            ICD-10
+                {/* Metrics */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="bg-muted/50 rounded-xl p-3 border border-border">
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground block mb-1">
+                            Code
                         </span>
-                        <span className="font-mono font-bold text-base text-[var(--primary)] leading-none">
+                        <span className="font-mono font-bold text-sm text-primary">
                             {data.mapped_icd10 ?? 'N/A'}
                         </span>
                     </div>
-                    <div className="bg-[var(--surface-1)] rounded-md p-2 border border-[var(--border-subtle)]">
-                        <span className="text-2xs font-bold uppercase tracking-clinical text-[var(--muted-foreground)] block mb-0.5">
-                            HCC Weight
+                    <div className="bg-muted/50 rounded-xl p-3 border border-border/50">
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground block mb-1 flex items-center gap-1">
+                            <TrendingUp size={10} className="text-clinical-nominal" />
+                            RAF Impact
                         </span>
-                        <span className="font-bold text-base text-[var(--foreground)] leading-none">
-                            {data.hcc_data.weight.toFixed(3)}
+                        <span className="font-bold text-sm text-foreground">
+                            +{data.hcc_data.weight.toFixed(3)}
                         </span>
                     </div>
                 </div>
 
-                {/* Description */}
-                <p className="text-xs text-[var(--muted-foreground)] leading-relaxed mb-2 line-clamp-2">
+                {/* Content */}
+                <p className="text-[11px] text-muted-foreground font-medium leading-relaxed mb-4 line-clamp-2">
                     {data.hcc_data.description}
                 </p>
 
-                {/* Approve button — h-12 (48px) ≥ 44px touch target ✓ */}
+                {/* Primary Action */}
                 <button
                     onClick={() => onApprove?.(data)}
                     className={cn(
-                        'w-full h-12 rounded-md',
-                        'bg-blue-600 hover:bg-blue-700 active:scale-[0.97]',
-                        'text-white font-semibold text-xs uppercase tracking-clinical',
-                        'flex items-center justify-center gap-2',
-                        'transition-all duration-150',
-                        'focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
-                        'focus-visible:ring-offset-white',
+                        'w-full h-11 rounded-xl flex items-center justify-between px-4',
+                        'bg-foreground text-background font-bold text-xs uppercase tracking-widest',
+                        'hover:scale-[1.02] active:scale-[0.98] transition-all',
+                        'group/btn'
                     )}
-                    aria-label={`Approve and add ${data.mapped_icd10} to chart`}
                 >
-                    <Check size={14} strokeWidth={2.5} />
-                    Approve &amp; Add to Chart
+                    <span className="flex items-center gap-2">
+                        <Check size={14} strokeWidth={3} />
+                        Commit to Chart
+                    </span>
+                    <ArrowRight size={14} className="opacity-0 -translate-x-2 group-hover/btn:opacity-100 group-hover/btn:translate-x-0 transition-all" />
                 </button>
             </div>
+
+            {/* HCC Status Indicator (Overlay corner) */}
+            {isHccRisk && (
+                <div className="absolute top-0 right-0 px-3 py-1 rounded-bl-xl bg-clinical-critical/10 border-l border-b border-clinical-critical/20 flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-clinical-critical animate-pulse" />
+                    <span className="text-[9px] font-bold text-clinical-critical uppercase tracking-widest">Risk</span>
+                </div>
+            )}
         </div>
     );
 };

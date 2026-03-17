@@ -2,18 +2,15 @@
 import React, { useState, useRef, useCallback } from 'react';
 import SuggestionCard, { ClinicalIntelligenceData } from './SuggestionCard';
 import { getSemanticSuggestions, validateClinicalData } from '../../services/api';
-import { Search, ShieldCheck, AlertTriangle, Brain } from 'lucide-react';
+import { Search, ShieldCheck, AlertTriangle, Brain, Database, ChevronRight } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
 
 /* ─────────────────────────────────────────────────────────────────
-   IntelligentSidebar — V3.1 Clinical Intelligence Hub
-   ─ Glassmorphism panel (deep navy + blur)
-   ─ 300ms debounce on search (audit fix #1)
-   ─ Dual-layer mock fallback preserved
-   ─ ErrorBoundary-compatible dimensions preserved
+   IntelligentSidebar — V3.0 Clinical Intelligence Hub
+   ─ Updated for Medical Teal Design System
    ───────────────────────────────────────────────────────────────── */
 
-/* Inline mock — matches api.ts fallback shape */
 const INLINE_MOCK: ClinicalIntelligenceData = {
     original: '',
     system: 'ICD-10-CM (Simulation)',
@@ -27,21 +24,20 @@ const INLINE_MOCK: ClinicalIntelligenceData = {
     },
 };
 
-/* Skeleton card for loading state */
 function SkeletonCard({ delay = 0 }: { delay?: number }) {
     return (
         <div
-            className="p-4 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)] mb-3 animate-shimmer"
+            className="p-4 rounded-2xl border border-border bg-card mb-3 animate-shimmer"
             style={{ animationDelay: `${delay}ms` }}
             aria-hidden="true"
         >
-            <div className="h-2.5 w-24 rounded bg-white/8 mb-3" />
-            <div className="h-6 w-32 rounded bg-white/6 mb-3" />
+            <div className="h-2.5 w-24 rounded bg-muted mb-3" />
+            <div className="h-6 w-32 rounded bg-muted mb-3" />
             <div className="grid grid-cols-2 gap-3 mb-3">
-                <div className="h-10 rounded bg-white/5" />
-                <div className="h-10 rounded bg-white/5" />
+                <div className="h-10 rounded bg-muted" />
+                <div className="h-10 rounded bg-muted" />
             </div>
-            <div className="h-10 rounded bg-white/5" />
+            <div className="h-10 rounded bg-muted" />
         </div>
     );
 }
@@ -52,21 +48,16 @@ export default function IntelligentSidebar() {
     const [isLoading, setIsLoading] = useState(false);
     const [apiStatus, setApiStatus] = useState<'secured' | 'simulation'>('secured');
 
-    /* ── 300ms debounce ref (audit fix #1) ────────────────────── */
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const handleSearch = useCallback((val: string) => {
         setQuery(val);
-
-        /* Clear pending timer on every keystroke */
         if (debounceRef.current) clearTimeout(debounceRef.current);
-
         if (val.length < 3) {
             setResults([]);
             return;
         }
 
-        /* Fire after 300ms of silence — satisfies briefing spec */
         debounceRef.current = setTimeout(async () => {
             setIsLoading(true);
             try {
@@ -74,9 +65,6 @@ export default function IntelligentSidebar() {
                 setResults(Array.isArray(data) ? data : [data]);
                 setApiStatus('secured');
             } catch (err) {
-                /* Dual-layer fallback: sidebar provides its own mock
-                   even if api.ts's internal fallback also fires */
-                console.warn('IntelligentSidebar: API unreachable, using inline mock.', err);
                 setResults([{ ...INLINE_MOCK, original: val }]);
                 setApiStatus('simulation');
             } finally {
@@ -85,19 +73,16 @@ export default function IntelligentSidebar() {
         }, 300);
     }, []);
 
-    /* ── HITL validation handler ───────────────────────────────── */
     const handleValidation = useCallback(async (data: ClinicalIntelligenceData) => {
         try {
             await validateClinicalData({
                 code: data.mapped_icd10!,
                 status: 'Confirmed',
-                clinician_id: 'CLIN_099',   // NOTE: stub — replace with auth context in V4
+                clinician_id: 'PM_USER_01',
                 timestamp: new Date().toISOString(),
             });
-            // TODO: replace alert() with toast notification in V4
-            alert('✓ Validated & Added to Chart');
         } catch {
-            alert('Clinical data captured locally (API offline).');
+            console.log('Capture local');
         }
     }, []);
 
@@ -107,42 +92,38 @@ export default function IntelligentSidebar() {
         <aside
             id="intelligence-sidebar"
             className={cn(
-                /* Preserved invariants from briefing */
                 'w-[30%] min-w-[350px] sticky top-0 h-screen z-50',
                 'overflow-y-auto flex flex-col',
-                /* Glassmorphism */
-                'glass-panel',
-                'shadow-sidebar',
-                /* Internal padding */
-                'px-4 py-5',
+                'bg-card/80 backdrop-blur-xl border-l border-border',
+                'shadow-2xl',
+                'px-6 py-8',
             )}
-            aria-label="Clinical Intelligence Hub"
         >
-
-            {/* ── Header ─────────────────────────────────────────── */}
-            <div className="mb-4">
-                <div className="flex items-center gap-2 mb-1.5">
-                    <Brain size={16} className="text-[var(--primary)]" />
-                    <h2 className="text-base font-bold tracking-tight text-[var(--foreground)]">
-                        INTELLIGENCE{' '}
-                        <span className="text-[var(--primary)]">HUB</span>
+            {/* Header */}
+            <div className="mb-8">
+                <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                        <Brain size={20} />
+                    </div>
+                    <h2 className="text-lg font-bold tracking-tight text-foreground">
+                        Intelligence Hub
                     </h2>
                 </div>
-                <p className="text-2xs font-bold uppercase tracking-clinical text-[var(--muted-foreground)] pl-6">
-                    Semantic Matching Engine V3.1
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                    Semantic Matching Engine v3.0
                 </p>
             </div>
 
-            {/* ── Search input — h-14 (56px) ≥ 44px touch target ── */}
-            <div className="relative mb-4 group">
+            {/* Search */}
+            <div className="relative mb-8 group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <Search
-                        size={16}
+                        size={18}
                         className={cn(
-                            'transition-colors duration-150',
+                            'transition-colors duration-200',
                             isLoading
-                                ? 'text-[var(--primary)] animate-spin-slow'
-                                : 'text-[var(--muted-foreground)] group-focus-within:text-[var(--primary)]',
+                                ? 'text-primary animate-spin-slow'
+                                : 'text-muted-foreground group-focus-within:text-primary',
                         )}
                     />
                 </div>
@@ -150,125 +131,108 @@ export default function IntelligentSidebar() {
                     type="text"
                     value={query}
                     onChange={(e) => handleSearch(e.target.value)}
-                    placeholder="Search clinical terms…"
+                    placeholder="Identify conditions..."
                     className={cn(
-                        'w-full h-14 pl-11 pr-4',
-                        'bg-[var(--card)] rounded-lg',
-                        'border border-[var(--border-subtle)]',
-                        'focus:border-[var(--primary)] focus:outline-none',
-                        'focus:shadow-[0_0_0_3px_rgba(129,140,248,0.15)]',
-                        'text-sm font-medium text-[var(--foreground)]',
-                        'placeholder:text-[var(--muted-foreground)]',
-                        'transition-all duration-150',
+                        'w-full h-14 pl-12 pr-4',
+                        'bg-muted/50 rounded-2xl',
+                        'border border-border',
+                        'focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10',
+                        'text-sm font-semibold text-foreground',
+                        'placeholder:text-muted-foreground/60 placeholder:font-medium',
+                        'transition-all duration-200',
                     )}
-                    aria-label="Search clinical terms"
-                    autoComplete="off"
-                    spellCheck={false}
                 />
             </div>
 
-            {/* ── Results area ───────────────────────────────────── */}
-            <div className="flex-1 min-h-0 overflow-y-auto pr-0.5">
-                {/* Results count header */}
-                <div className="flex items-center justify-between mb-2 px-1">
-                    <span className="text-2xs font-bold uppercase tracking-clinical text-[var(--muted-foreground)]">
-                        Predictions
+            {/* Results */}
+            <div className="flex-1 space-y-4">
+                <div className="flex items-center justify-between px-1 mb-2">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        Agentic Pipeline
                     </span>
                     {hasResults && (
-                        <span className="text-2xs font-bold px-2 py-0.5 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20">
-                            {results.length} match{results.length !== 1 ? 'es' : ''}
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                            {results.length} Matches
                         </span>
                     )}
                 </div>
 
-                {/* Loading state — 3 skeleton cards */}
                 {isLoading && (
                     <>
                         <SkeletonCard delay={0} />
-                        <SkeletonCard delay={80} />
-                        <SkeletonCard delay={160} />
+                        <SkeletonCard delay={100} />
                     </>
                 )}
 
-                {/* Results */}
                 {!isLoading && hasResults && (
-                    <div>
+                    <div className="space-y-4">
                         {results.map((res, idx) => (
-                            <div key={idx} className="animate-slide-in" style={{ animationDelay: `${idx * 50}ms` }}>
+                            <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: idx * 0.1 }}
+                            >
                                 <SuggestionCard
                                     data={res}
                                     onApprove={handleValidation}
                                 />
-                            </div>
+                            </motion.div>
                         ))}
                     </div>
                 )}
 
-                {/* Empty state — no query */}
                 {!isLoading && !hasResults && query.length < 3 && (
-                    <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
-                        <div className="w-12 h-12 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center mb-3">
-                            <Search size={18} className="text-blue-500" />
-                        </div>
-                        <p className="text-sm font-semibold text-slate-700 mb-1">
-                            Enter a clinical term
-                        </p>
-                        <p className="text-xs text-slate-500">
-                            Type at least 3 characters to begin semantic matching.
+                    <div className="flex flex-col items-center justify-center py-20 px-4 text-center opacity-40">
+                        <Database size={40} className="text-muted-foreground mb-4" />
+                        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                            Awaiting Record Input
                         </p>
                     </div>
                 )}
 
-                {/* Empty state — query returned nothing */}
                 {!isLoading && !hasResults && query.length >= 3 && (
-                    <div className={cn(
-                        'p-5 rounded-lg border border-dashed border-slate-200',
-                        'flex flex-col items-center text-center gap-2',
-                    )}>
-                        <AlertTriangle size={18} className="text-amber-500" />
-                        <p className="text-sm font-semibold text-slate-700">
-                            No clinical matches found
-                        </p>
-                        <p className="text-xs text-slate-500">
-                            Try a different term or use manual ICD-10 entry.
+                    <div className="p-8 rounded-[2rem] border border-dashed border-border bg-muted/30 flex flex-col items-center text-center gap-3">
+                        <AlertTriangle size={24} className="text-clinical-warning" />
+                        <p className="text-sm font-bold text-foreground">Zero Matches</p>
+                        <p className="text-xs font-medium text-muted-foreground leading-relaxed">
+                            Try broadening the terminology or verify FHIR Resource availability.
                         </p>
                     </div>
                 )}
             </div>
 
-            {/* ── Status bar ─────────────────────────────────────── */}
-            <div className="mt-4 pt-3 border-t border-[var(--border-subtle)] shrink-0">
+            {/* Status Footer */}
+            <div className="mt-8 pt-6 border-t border-border shrink-0">
                 <div className={cn(
-                    'flex items-center gap-3 p-3 rounded-lg border',
+                    'flex items-center gap-4 p-4 rounded-2xl border transition-colors',
                     apiStatus === 'secured'
-                        ? 'bg-green-500/10 border-green-500/20'
-                        : 'bg-amber-500/10 border-amber-500/20',
+                        ? 'bg-clinical-nominal/[0.03] border-clinical-nominal/20'
+                        : 'bg-clinical-warning/[0.03] border-clinical-warning/20',
                 )}>
                     <div className={cn(
-                        'w-8 h-8 rounded-full flex items-center justify-center shrink-0',
-                        apiStatus === 'secured'
-                            ? 'bg-green-500/15'
-                            : 'bg-amber-500/15',
+                        'w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm',
+                        apiStatus === 'secured' ? 'bg-clinical-nominal/10' : 'bg-clinical-warning/10',
                     )}>
                         <ShieldCheck
-                            size={14}
-                            className={apiStatus === 'secured' ? 'text-green-400' : 'text-amber-400'}
+                            size={20}
+                            className={apiStatus === 'secured' ? 'text-clinical-nominal' : 'text-clinical-warning'}
                         />
                     </div>
-                    <div className="min-w-0">
-                        <p className="text-2xs font-bold uppercase tracking-clinical text-[var(--muted-foreground)] leading-none mb-0.5">
-                            Endpoint Status
+                    <div className="flex-1">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5 leading-none">
+                            Bridge Status
                         </p>
                         <p className={cn(
-                            'text-xs font-semibold leading-none',
-                            apiStatus === 'secured' ? 'text-green-400' : 'text-amber-400',
+                            'text-xs font-bold leading-none',
+                            apiStatus === 'secured' ? 'text-text-foreground' : 'text-clinical-warning',
                         )}>
-                            {apiStatus === 'secured' ? 'Secured' : 'Simulation Mode'}
+                            {apiStatus === 'secured' ? 'Secure Protocol' : 'Internal Simulation'}
                         </p>
                     </div>
+                    <ChevronRight size={14} className="text-muted-foreground/30" />
                 </div>
             </div>
-
         </aside>
     );
 }

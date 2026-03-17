@@ -11,57 +11,52 @@
    ================================================================ */
 
 :root {
-  /* Brand palette */
-  --primary: #4f46e5;
+  /* Brand palette — Clinical Intel Teal */
+  --primary: #00d4aa;
+  --primary-foreground: #ffffff;
   --secondary: #14b8a6;
-  --accent: #f59e0b;
+  --secondary-foreground: #ffffff;
+  --accent: #00d4aa;
+  --accent-foreground: #ffffff;
   --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
 
   /* Surfaces */
-  --background: #f7f9f3;
+  --background: #f8fafc;
+  --foreground: #020617;
   --card: #ffffff;
+  --card-foreground: #020617;
   --popover: #ffffff;
-  --sidebar: #f7f9f3;
+  --popover-foreground: #020617;
+  --sidebar: #f1f5f9;
+  --sidebar-foreground: #334155;
+  --sidebar-primary: #00d4aa;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e2e8f0;
+  --sidebar-accent-foreground: #020617;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #00d4aa;
 
-  /* Text */
-  --foreground: #000000;
-  --muted-foreground: #333333;
-  --card-foreground: #000000;
-
-  /* Borders */
-  --border: #000000;
-  --input: #737373;
-  --ring: #a5b4fc;
+  /* Text & Borders */
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #00d4aa;
 
   /* Utility */
-  --muted: #f0f0f0;
-  --radius: 1rem;
+  --radius: 0.75rem;
 
   /* Chart colors */
-  --chart-1: #4f46e5;
+  --chart-1: #00d4aa;
   --chart-2: #14b8a6;
-  --chart-3: #f59e0b;
-  --chart-4: #ec4899;
-  --chart-5: #22c55e;
+  --chart-3: #0ea5e9;
+  --chart-4: #6366f1;
+  --chart-5: #a855f7;
 
   /* Typography */
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-  --font-serif: 'Inter', sans-serif;
-
-  /* Shadows */
-  --shadow-offset-x: 3px;
-  --shadow-offset-y: 3px;
-  --shadow-color: #1a1a1a;
-  --shadow-opacity: 0.12;
-
-  /* Semantic aliases */
-  --text-tertiary: #6b7280;
-  --surface-0: #f9fafb;
-  --surface-1: #f3f4f6;
-  --surface-2: #e5e7eb;
-  --border-subtle: #e5e7eb;
-  --border-strong: #9ca3af;
 }
 
 /* ================================================================
@@ -69,40 +64,41 @@
    ================================================================ */
 
 .dark {
-  --primary: #e37400;
-  /* Superdesign Orange */
-  --secondary: #2dd4bf;
-  --accent: #fcd34d;
-  --destructive: #f87171;
+  --primary: #00d4aa;
+  --primary-foreground: #ffffff;
+  --secondary: #14b8a6;
+  --secondary-foreground: #ffffff;
+  --accent: #00d4aa;
+  --accent-foreground: #ffffff;
+  --destructive: #7f1d1d;
+  --destructive-foreground: #ffffff;
 
-  --background: #151517;
-  /* Industrial Charcoal */
-  --card: #212121;
-  /* Industrial Gray */
-  --popover: #212121;
-  --sidebar: #151517;
+  --background: #020617;
+  --foreground: #f8fafc;
+  --card: #0f172a;
+  --card-foreground: #f8fafc;
+  --popover: #0f172a;
+  --popover-foreground: #f8fafc;
+  --sidebar: #020617;
+  --sidebar-foreground: #94a3b8;
+  --sidebar-primary: #00d4aa;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #f8fafc;
+  --sidebar-border: #1e293b;
+  --sidebar-ring: #00d4aa;
 
-  --foreground: #ffffff;
-  --muted-foreground: #9ca3af;
-  --card-foreground: #ffffff;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --border: #1e293b;
+  --input: #1e293b;
+  --ring: #00d4aa;
 
-  --border: #424242;
-  --input: #ffffff;
-  --ring: #e37400;
-  --muted: #333333;
-
-  --chart-1: #e37400;
-  --chart-2: #2dd4bf;
-  --chart-3: #fcd34d;
-  --chart-4: #f472b6;
-  --chart-5: #4ade80;
-
-  --text-tertiary: #6b7280;
-  --surface-0: #1a1a1c;
-  --surface-1: #28282a;
-  --surface-2: #3f3f42;
-  --border-subtle: #333333;
-  --border-strong: #444444;
+  --chart-1: #00d4aa;
+  --chart-2: #14b8a6;
+  --chart-3: #0ea5e9;
+  --chart-4: #6366f1;
+  --chart-5: #a855f7;
 }
 
 /* ================================================================

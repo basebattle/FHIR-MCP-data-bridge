@@ -1,4 +1,5 @@
 import time
+import asyncio
 from typing import Optional, Dict, Any
 import httpx
 from fhir_mcp.config.settings import Settings
@@ -11,6 +12,7 @@ class AuthManager:
     def __init__(self, settings: Settings):
         self.settings = settings
         self.token_cache: Dict[str, Any] = {}
+        self._refresh_lock = asyncio.Lock()
 
     async def get_auth_header(self) -> Dict[str, str]:
         """Returns the Authorization header if auth is enabled."""
@@ -28,22 +30,28 @@ class AuthManager:
         if cached and cached["expires_at"] > time.time() + 60:
             return cached["access_token"]
 
-        if self.settings.fhir_server_auth_mode == "client_credentials":
-            return await self._refresh_client_credentials(cache_key)
-        
-        if self.settings.fhir_server_auth_mode == "authorization_code":
-            # In a real SMART-on-FHIR app, this would involve a redirect.
-            # For an MCP server, we expect the FHIR_SERVER_ACCESS_TOKEN 
-            # or a pre-exchanged Refresh Token to be present in settings.
-            if hasattr(self.settings, "fhir_server_access_token") and self.settings.fhir_server_access_token:
-                return self.settings.fhir_server_access_token
+        async with self._refresh_lock:
+            # Double check in case another task refreshed while we were waiting
+            cached = self.token_cache.get(cache_key)
+            if cached and cached["expires_at"] > time.time() + 60:
+                return cached["access_token"]
+
+            if self.settings.fhir_server_auth_mode == "client_credentials":
+                return await self._refresh_client_credentials(cache_key)
             
-            raise FHIRAuthError(
-                "authorization_code mode requires an interactive login or a valid access token in environment variables. "
-                "Please set FHIR_SERVER_ACCESS_TOKEN for headless use."
-            )
-            
-        raise FHIRAuthError(f"Auth mode {self.settings.fhir_server_auth_mode} not supported or token missing.")
+            if self.settings.fhir_server_auth_mode == "authorization_code":
+                # In a real SMART-on-FHIR app, this would involve a redirect.
+                # For an MCP server, we expect the FHIR_SERVER_ACCESS_TOKEN 
+                # or a pre-exchanged Refresh Token to be present in settings.
+                if hasattr(self.settings, "fhir_server_access_token") and self.settings.fhir_server_access_token:
+                    return self.settings.fhir_server_access_token
+                
+                raise FHIRAuthError(
+                    "authorization_code mode requires an interactive login or a valid access token in environment variables. "
+                    "Please set FHIR_SERVER_ACCESS_TOKEN for headless use."
+                )
+                
+            raise FHIRAuthError(f"Auth mode {self.settings.fhir_server_auth_mode} not supported or token missing.")
 
     async def _refresh_client_credentials(self, cache_key: str) -> str:
         """Performs client_credentials grant to get a new token."""
