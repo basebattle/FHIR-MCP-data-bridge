@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useDemoOrchestrator } from "@/hooks/useDemoOrchestrator";
 import { PatientBanner } from "@/components/simulator/PatientBanner";
@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, Play, RotateCcw, AlertTriangle, CheckCircle2, FlaskConical, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export default function SimulatorPage() {
+function SimulatorContent() {
   const searchParams = useSearchParams();
   const scenarioId = searchParams.get("scenario");
   const { state, startDemo, advancePhase, reset } = useDemoOrchestrator();
@@ -250,5 +250,13 @@ export default function SimulatorPage() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+export default function SimulatorPage() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-background"><div className="animate-pulse">Loading simulator environment...</div></div>}>
+      <SimulatorContent />
+    </Suspense>
   );
 }
