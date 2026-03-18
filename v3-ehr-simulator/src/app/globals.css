@@ -280,6 +280,12 @@ textarea {
   }
 }
 
+@keyframes border-beam {
+  100% {
+    offset-distance: 100%;
+  }
+}
+
 /* ================================================================
    UTILITY CLASSES
    ================================================================ */
@@ -314,6 +320,10 @@ textarea {
 
 .animate-marquee {
   animation: marquee 18s linear infinite;
+}
+
+.animate-border-beam {
+  animation: border-beam var(--duration, 15s) infinite linear;
 }
 
 .stagger-1 {

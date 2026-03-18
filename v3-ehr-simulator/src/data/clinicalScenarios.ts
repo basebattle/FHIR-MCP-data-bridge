@@ -55,6 +55,7 @@ export interface ClinicalScenario {
   timelineEvents: TimelineEvent[];
   reasoningSteps: ReasoningStep[];
   demoSearchQuery: string;
+  icon: string;
 }
 
 /* ── Scenario 1: Heart Failure ──────────────────────────────── */
@@ -91,6 +92,7 @@ const HEART_FAILURE: ClinicalScenario = {
     { id: 6, label: 'HITL Capture', detail: 'Awaiting clinician validation. Status: pending', status: 'pending' },
   ],
   demoSearchQuery: 'heart failure edema',
+  icon: 'HeartPulse',
 };
 
 /* ── Scenario 2: COPD Exacerbation ─────────────────────────── */
@@ -127,6 +129,7 @@ const COPD_EXACERBATION: ClinicalScenario = {
     { id: 6, label: 'HITL Capture', detail: 'Awaiting dual-code clinician sign-off', status: 'pending' },
   ],
   demoSearchQuery: 'COPD exacerbation dyspnea',
+  icon: 'Wind',
 };
 
 /* ── Scenario 3: Diabetic Ketoacidosis ──────────────────────── */
@@ -163,6 +166,7 @@ const DKA: ClinicalScenario = {
     { id: 6, label: 'HITL Capture', detail: 'Awaiting metabolic emergency co-sign', status: 'pending' },
   ],
   demoSearchQuery: 'diabetic ketoacidosis hyperglycemia',
+  icon: 'Droplets',
 };
 
 /* ── Scenario 4: Sepsis ─────────────────────────────────────── */
@@ -199,6 +203,7 @@ const SEPSIS: ClinicalScenario = {
     { id: 6, label: 'HITL Capture', detail: 'Critical care physician sign-off required — ICU level', status: 'pending' },
   ],
   demoSearchQuery: 'sepsis bacteremia fever hypotension',
+  icon: 'Activity',
 };
 
 export const ALL_SCENARIOS: ClinicalScenario[] = [

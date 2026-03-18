@@ -5,6 +5,8 @@ import { type VitalSign } from "@/data/clinicalScenarios";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Sparkline } from "../Sparkline";
+import { VitalValueDisplay } from "@/components/ui/NumberTicker";
+import { BorderBeam } from "@/components/ui/BorderBeam";
 
 interface VitalsGridProps {
     vitals: VitalSign[];
@@ -48,7 +50,7 @@ export function VitalsGrid({ vitals, className }: VitalsGridProps) {
                                     vital.status === 'critical' ? "text-clinical-critical" :
                                         vital.status === 'warning' ? "text-clinical-warning" : "text-foreground"
                                 )}>
-                                    {vital.value}
+                                    <VitalValueDisplay value={vital.value} />
                                 </span>
                                 <span className="text-xs text-muted-foreground font-medium">{vital.unit}</span>
                             </div>
@@ -73,7 +75,11 @@ export function VitalsGrid({ vitals, className }: VitalsGridProps) {
                     </div>
 
                     {/* Interactive Mouse Shadow / Magic UI style overlay placeholder */}
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                    <div className="absolute inset-0 rounded-[inherit] bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+                    {vital.status === 'critical' && (
+                        <BorderBeam duration={8} size={150} colorFrom="#ef4444" colorTo="transparent" />
+                    )}
                 </motion.div>
             ))}
         </div>

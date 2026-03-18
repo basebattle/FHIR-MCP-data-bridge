@@ -11,6 +11,8 @@ import IntelligentSidebar from "@/components/Sidebar/IntelligentSidebar";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, Play, RotateCcw, AlertTriangle, CheckCircle2, FlaskConical, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getRandomScenario } from "@/data/clinicalScenarios";
+import { AnimatedList } from "@/components/ui/AnimatedList";
 
 function SimulatorContent() {
   const searchParams = useSearchParams();
@@ -18,8 +20,13 @@ function SimulatorContent() {
   const { state, startDemo, advancePhase, reset } = useDemoOrchestrator();
 
   useEffect(() => {
-    if (scenarioId && state.phase === 'idle') {
-      startDemo(scenarioId);
+    if (state.phase === 'idle') {
+      if (scenarioId) {
+        startDemo(scenarioId);
+      } else {
+        const random = getRandomScenario();
+        startDemo(random.id);
+      }
     }
   }, [scenarioId, state.phase, startDemo]);
 
@@ -90,19 +97,17 @@ function SimulatorContent() {
                         <ClipboardList size={16} />
                         Clinical Event Stream
                       </h3>
-                      <div className="space-y-4">
+                      <AnimatedList className="space-y-0 gap-4">
                         {state.visibleEvents.length === 0 && (
-                          <div className="h-40 flex items-center justify-center border-2 border-dashed border-border rounded-2xl text-muted-foreground italic text-sm">
+                          <div key="empty-state" className="h-40 flex items-center justify-center border-2 border-dashed border-border rounded-2xl text-muted-foreground italic text-sm">
                             Awaiting timeline triggers...
                           </div>
                         )}
                         {state.visibleEvents.map((event, idx) => (
-                          <motion.div
+                          <div
                             key={event.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
                             className={cn(
-                              "p-4 rounded-2xl border flex gap-4 items-start transition-all",
+                              "p-4 rounded-2xl border flex gap-4 items-start transition-all w-full",
                               event.severity === 'critical' ? "bg-clinical-critical/[0.03] border-clinical-critical/20" : "bg-muted/50 border-border"
                             )}
                           >
@@ -124,9 +129,9 @@ function SimulatorContent() {
                                 </div>
                               )}
                             </div>
-                          </motion.div>
+                          </div>
                         ))}
-                      </div>
+                      </AnimatedList>
                     </div>
                   </motion.div>
                 ) : state.phase === 'analysis' || state.phase === 'hitl' || state.phase === 'complete' ? (

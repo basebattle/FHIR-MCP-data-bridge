@@ -6,7 +6,15 @@ import { motion } from "framer-motion";
 import { MeshGradient } from "@/components/hero/MeshGradient";
 import { ALL_SCENARIOS } from "@/data/clinicalScenarios";
 import { cn } from "@/lib/utils";
-import { Activity, Brain, Shield, Zap, ChevronRight, ArrowUpRight, Github, ExternalLink } from "lucide-react";
+import { Activity, Brain, Shield, Zap, ChevronRight, ArrowUpRight, Github, ExternalLink, HeartPulse, Wind, Droplets } from "lucide-react";
+import { MagicCard } from "@/components/ui/MagicCard";
+
+const ICON_MAP: Record<string, any> = {
+  HeartPulse: HeartPulse,
+  Wind: Wind,
+  Droplets: Droplets,
+  Activity: Activity,
+};
 
 export default function LandingPage() {
   return (
@@ -117,40 +125,43 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {ALL_SCENARIOS.map((scenario, idx) => (
-              <motion.div
-                key={scenario.id}
-                className="group relative h-96 rounded-[2rem] neo-card overflow-hidden flex flex-col p-10"
-              >
-                {/* Hover Glow */}
-                <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+            {ALL_SCENARIOS.map((scenario, idx) => {
+              const Icon = ICON_MAP[scenario.icon] || Brain;
+              return (
+                <MagicCard
+                  key={scenario.id}
+                  className="group relative h-96 rounded-[2rem] neo-card overflow-hidden flex flex-col p-10"
+                >
+                  {/* Hover Glow */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
-                <div className="mb-auto">
-                  <div className={cn("inline-flex p-3 rounded-2xl mb-6 bg-muted text-foreground group-hover:bg-primary group-hover:text-white transition-colors")}>
-                    <Brain size={24} />
+                  <div className="mb-auto">
+                    <div className={cn("inline-flex p-3 rounded-2xl mb-6 bg-muted text-foreground group-hover:bg-primary group-hover:text-white transition-colors")}>
+                      <Icon size={24} />
+                    </div>
+                    <h4 className="text-2xl font-bold mb-2">{scenario.name}</h4>
+                    <p className="text-sm text-muted-foreground font-medium mb-4">{scenario.tagline}</p>
                   </div>
-                  <h4 className="text-2xl font-bold mb-2">{scenario.name}</h4>
-                  <p className="text-sm text-muted-foreground font-medium mb-4">{scenario.tagline}</p>
-                </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                    <span>Complexity: High</span>
-                    <span>9 nodes</span>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                      <span>Complexity: High</span>
+                      <span>9 nodes</span>
+                    </div>
+                    <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
+                      <div className="w-full h-full bg-primary/30" />
+                    </div>
+                    <Link
+                      href={`/simulator?scenario=${scenario.id}`}
+                      className="flex items-center justify-between w-full p-6 rounded-2xl bg-muted group-hover:bg-primary group-hover:text-white transition-all font-bold"
+                    >
+                      Analyze Records
+                      <ChevronRight size={18} />
+                    </Link>
                   </div>
-                  <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
-                    <div className="w-full h-full bg-primary/30" />
-                  </div>
-                  <Link
-                    href={`/simulator?scenario=${scenario.id}`}
-                    className="flex items-center justify-between w-full p-6 rounded-2xl bg-muted group-hover:bg-primary group-hover:text-white transition-all font-bold"
-                  >
-                    Analyze Records
-                    <ChevronRight size={18} />
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
+                </MagicCard>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -165,8 +176,8 @@ export default function LandingPage() {
             <span className="font-heavy text-xl tracking-tighter">LOINC</span>
           </div>
           <div className="text-center md:text-right">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground mb-1">Architect</p>
-            <p className="text-sm font-bold text-foreground">Piyush Kumar (Sharma) — Healthcare AI Strategic Lead</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground mb-1">Portfolio Attribution</p>
+            <p className="text-sm font-bold text-foreground">A project in the portfolio of Dr Piyush Sharma (PT, MHA)</p>
           </div>
         </div>
       </footer>
