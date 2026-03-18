@@ -5,9 +5,12 @@ import { ShieldCheck, Zap, Server, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function HealthStatusBar() {
-    const [timestamp, setTimestamp] = useState(new Date().toISOString());
+    const [mounted, setMounted] = useState(false);
+    const [timestamp, setTimestamp] = useState("");
 
     useEffect(() => {
+        setMounted(true);
+        setTimestamp(new Date().toISOString());
         const timer = setInterval(() => setTimestamp(new Date().toISOString()), 1000);
         return () => clearInterval(timer);
     }, []);
@@ -30,7 +33,7 @@ export function HealthStatusBar() {
             </div>
 
             <div className="flex items-center gap-4">
-                <span className="font-mono hidden lg:inline">{timestamp}</span>
+                <span className="font-mono hidden lg:inline" suppressHydrationWarning>{mounted ? timestamp : "SYNCING..."}</span>
                 <div className="flex items-center gap-1.5">
                     <Globe size={12} />
                     <span>Region: <span className="text-foreground">US-EAST</span></span>

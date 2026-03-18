@@ -45,7 +45,7 @@ function SimulatorContent() {
       <div className="flex-1 flex flex-col overflow-y-auto">
         <PatientBanner scenario={state.scenario} />
 
-        <main className="flex-1 p-6 max-w-7xl mx-auto w-full flex flex-col gap-6">
+        <main className="flex-1 p-10 max-w-7xl mx-auto w-full flex flex-col gap-10">
           {/* Progress Bar */}
           <div className="w-full flex items-center gap-4 mb-4">
             {['intake', 'vitals', 'events', 'analysis', 'hitl', 'complete'].map((p, i) => {
@@ -72,7 +72,7 @@ function SimulatorContent() {
           <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[500px]">
 
             {/* Left Column: Context & Evidence */}
-            <div className="lg:col-span-8 flex flex-col gap-6">
+            <div className="lg:col-span-8 flex flex-col gap-10">
               <AnimatePresence mode="wait">
                 {state.phase === 'intake' || state.phase === 'vitals' || state.phase === 'events' ? (
                   <motion.div
@@ -85,7 +85,7 @@ function SimulatorContent() {
                     <VitalsGrid vitals={state.scenario?.vitals || []} />
 
                     {/* Timeline Events Column */}
-                    <div className="bg-card border border-border rounded-[2rem] p-8 min-h-[300px]">
+                    <div className="clinical-card rounded-[2rem] p-10 min-h-[300px]">
                       <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-2">
                         <ClipboardList size={16} />
                         Clinical Event Stream
@@ -152,8 +152,8 @@ function SimulatorContent() {
             </div>
 
             {/* Right Column: AI Insights & Controls */}
-            <div className="lg:col-span-4 flex flex-col gap-6">
-              <div className="p-8 rounded-[2rem] bg-card border border-border shadow-sm flex-1 flex flex-col">
+            <div className="lg:col-span-4 flex flex-col gap-10">
+              <div className="p-10 clinical-card flex-1 flex flex-col">
                 <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-8">Simulation Control</h3>
 
                 {/* Status Indicator */}
@@ -191,7 +191,7 @@ function SimulatorContent() {
               </div>
 
               {/* Dynamic Suggestion Card (Placeholder for Intelligence) */}
-              <div className="p-6 rounded-[2rem] bg-gradient-to-br from-primary/10 to-transparent border border-primary/20">
+              <div className="p-8 rounded-[2rem] bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 shadow-2xl">
                 <div className="flex items-center gap-2 mb-4">
                   <CheckCircle2 size={18} className="text-primary" />
                   <span className="text-xs font-bold uppercase tracking-widest text-primary">Inference Confidence</span>

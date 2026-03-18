@@ -22,11 +22,11 @@ export function VitalsGrid({ vitals, className }: VitalsGridProps) {
                     transition={{ delay: idx * 0.1 }}
                     whileHover={{ translateY: -4 }}
                     className={cn(
-                        "relative group p-5 rounded-2xl border transition-all duration-300",
-                        "bg-card hover:shadow-2xl hover:shadow-primary/5",
+                        "relative group p-8 transition-all duration-300",
+                        "clinical-card",
                         vital.status === 'critical' ? "border-clinical-critical/30 bg-clinical-critical/[0.02]" :
                             vital.status === 'warning' ? "border-clinical-warning/30 bg-clinical-warning/[0.02]" :
-                                "border-border hover:border-primary/30"
+                                "hover:border-primary/30"
                     )}
                 >
                     {/* Status Glow */}

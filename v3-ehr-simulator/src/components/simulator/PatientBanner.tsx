@@ -20,7 +20,7 @@ export function PatientBanner({ scenario, className }: PatientBannerProps) {
         <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className={cn("w-full bg-card border-b border-border p-6 shadow-sm relative overflow-hidden", className)}
+            className={cn("w-full glass-panel border-b border-border p-8 shadow-md relative overflow-hidden", className)}
         >
             {/* Background Decor */}
             <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">

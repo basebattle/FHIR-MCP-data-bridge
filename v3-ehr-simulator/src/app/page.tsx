@@ -120,8 +120,7 @@ export default function LandingPage() {
             {ALL_SCENARIOS.map((scenario, idx) => (
               <motion.div
                 key={scenario.id}
-                whileHover={{ y: -8 }}
-                className="group relative h-96 rounded-[2rem] bg-card border border-border shadow-sm overflow-hidden flex flex-col p-8 transition-all hover:shadow-2xl hover:border-primary/50"
+                className="group relative h-96 rounded-[2rem] neo-card overflow-hidden flex flex-col p-10"
               >
                 {/* Hover Glow */}
                 <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
@@ -144,7 +143,7 @@ export default function LandingPage() {
                   </div>
                   <Link
                     href={`/simulator?scenario=${scenario.id}`}
-                    className="flex items-center justify-between w-full p-4 rounded-2xl bg-muted group-hover:bg-primary group-hover:text-white transition-all font-bold"
+                    className="flex items-center justify-between w-full p-6 rounded-2xl bg-muted group-hover:bg-primary group-hover:text-white transition-all font-bold"
                   >
                     Analyze Records
                     <ChevronRight size={18} />
